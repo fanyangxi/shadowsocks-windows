@@ -126,9 +126,16 @@ namespace Shadowsocks.View
             //{
             //    return;
             //}
-
-            _ssController.SaveServers(_currentConfiguration.ServerInfos, _currentConfiguration.localPort);
-            CacheOriginalConfigData();
+            try
+            {
+                ShowStatusMessage(string.Empty);
+                _ssController.SaveServers(_currentConfiguration.ServerInfos, _currentConfiguration.localPort);
+                CacheOriginalConfigData();
+            }
+            catch (Exception ex)
+            {
+                ShowStatusMessage(ex.Message);
+            }
 
             this.btnOK.Enabled = this.IsCurrentConfigDataChanged();
         }
@@ -292,9 +299,16 @@ namespace Shadowsocks.View
             _originalSerializedConfigData = SimpleJson.SimpleJson.SerializeObject(_currentConfiguration);
         }
 
-        private void ShowStatusMessage(string message)
+        private void ShowStatusMessage(string message, bool isAppending = false)
         {
-            lblStatus.Text = message;
+            if (isAppending)
+            {
+                lblStatus.Text += message;
+            }
+            else
+            {
+                lblStatus.Text = message;
+            }
         }
 
         private bool TryAction(Action<object> action)
@@ -306,7 +320,7 @@ namespace Shadowsocks.View
             }
             catch (Exception ex)
             {
-                ShowStatusMessage(ex.Message);
+                ShowStatusMessage(ex.Message, true);
                 return false;
             }
         }

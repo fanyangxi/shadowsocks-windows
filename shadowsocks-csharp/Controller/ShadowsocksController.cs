@@ -127,6 +127,12 @@ namespace Shadowsocks.Controller
             //    return;
             //}
 
+            Utils.IsPortValid(localPort);
+            foreach (var item in serverInfos)
+            {
+                Utils.IsSsServerInfoValid(item);
+            }
+
             _config.ServerInfos = serverInfos;
             _config.localPort = localPort;
 
