@@ -87,12 +87,13 @@ namespace Shadowsocks.Model
             return this.server == o2.server && this.server_port == o2.server_port;
         }
 
-        public string FriendlyName()
+        public string DisplayName()
         {
             if (string.IsNullOrEmpty(server))
             {
                 return I18N.GetString("New server");
             }
+
             if (string.IsNullOrEmpty(remarks))
             {
                 return server + ":" + server_port;

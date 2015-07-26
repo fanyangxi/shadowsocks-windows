@@ -38,7 +38,7 @@ namespace Shadowsocks.Controller
         public event EventHandler EnableStatusChanged;
         public event EventHandler EnableGlobalChanged;
         public event EventHandler ShareOverLANStatusChanged;
-        
+
         // when user clicked Edit PAC, and PAC file has already created
         public event EventHandler<PathEventArgs> PACFileReadyToOpen;
         public event EventHandler<PathEventArgs> UserRuleFileReadyToOpen;
@@ -99,6 +99,7 @@ namespace Shadowsocks.Controller
                     return strategy;
                 }
             }
+
             return null;
         }
 
@@ -112,10 +113,17 @@ namespace Shadowsocks.Controller
             return GetCurrentServer();
         }
 
+        /// <summary>
+        /// Other options of the config is not maintained in the config-form, 
+        /// so we only pass in two params (servers and port).
+        /// </summary>
+        /// <param name="servers">Updated server infos</param>
+        /// <param name="localPort">Update local port</param>
         public void SaveServers(List<SsServerInfo> servers, int localPort)
         {
             _config.ServerInfos = servers;
             _config.localPort = localPort;
+
             SaveConfig(_config);
         }
 
@@ -125,7 +133,7 @@ namespace Shadowsocks.Controller
             {
                 var server = new SsServerInfo(ssURL);
                 _config.ServerInfos.Add(server);
-                _config.index = _config.ServerInfos.Count - 1;
+                _config.selectedSsServerInfoIndex = _config.ServerInfos.Count - 1;
                 SaveConfig(_config);
                 return true;
             }
@@ -170,14 +178,14 @@ namespace Shadowsocks.Controller
 
         public void SelectServerIndex(int index)
         {
-            _config.index = index;
+            _config.selectedSsServerInfoIndex = index;
             _config.strategy = null;
             SaveConfig(_config);
         }
 
         public void SelectStrategy(string strategyID)
         {
-            _config.index = -1;
+            _config.selectedSsServerInfoIndex = -1;
             _config.strategy = strategyID;
             SaveConfig(_config);
         }

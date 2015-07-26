@@ -132,7 +132,7 @@ namespace Shadowsocks.View
             }
             else
             {
-                serverInfo = config.GetCurrentServer().FriendlyName();
+                serverInfo = config.GetCurrentServer().DisplayName();
             }
             // we want to show more details but notify icon title is limited to 63 characters
             string text = I18N.GetString("Shadowsocks") + " " + UpdateChecker.Version + "\n" +
@@ -257,7 +257,6 @@ namespace Shadowsocks.View
             _notifyIcon.BalloonTipClicked -= notifyIcon1_BalloonTipClicked;
         }
 
-
         private void LoadCurrentConfiguration()
         {
             Configuration config = controller.GetConfigurationCopy();
@@ -289,11 +288,12 @@ namespace Shadowsocks.View
                 items.Add(i, item);
                 i++;
             }
+
             int strategyCount = i;
             Configuration configuration = controller.GetConfigurationCopy();
             foreach (var server in configuration.ServerInfos)
             {
-                MenuItem item = new MenuItem(server.FriendlyName());
+                MenuItem item = new MenuItem(server.DisplayName());
                 item.Tag = i - strategyCount;
                 item.Click += AServerItem_Click;
                 items.Add(i, item);
@@ -302,7 +302,7 @@ namespace Shadowsocks.View
 
             foreach (MenuItem item in items)
             {
-                if (item.Tag != null && (item.Tag.ToString() == configuration.index.ToString() || item.Tag.ToString() == configuration.strategy))
+                if (item.Tag != null && (item.Tag.ToString() == configuration.selectedSsServerInfoIndex.ToString() || item.Tag.ToString() == configuration.strategy))
                 {
                     item.Checked = true;
                 }

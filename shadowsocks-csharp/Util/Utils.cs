@@ -1,4 +1,5 @@
 ﻿using Shadowsocks.Controller;
+using Shadowsocks.Model;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -54,6 +55,13 @@ namespace Shadowsocks
             {
                 throw new Exception(I18N.GetString("assertion failure"));
             }
+        }
+
+        public static void IsSsServerInfoValid(SsServerInfo server)
+        {
+            Utils.IsPortValid(server.server_port);
+            Utils.IsPasswordValid(server.password);
+            Utils.IsServerValid(server.server);
         }
 
         public static void IsPortValid(int port)

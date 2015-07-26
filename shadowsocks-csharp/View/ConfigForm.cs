@@ -15,9 +15,10 @@ namespace Shadowsocks.View
     public partial class ConfigForm : Form
     {
         // this is a copy of configuration that we are working on
-        private Configuration _modifiedConfiguration;
-        private int _oldSelectedIndex = -1;
+        private Configuration _currentConfiguration;
+        private SsServerInfo _selectedSsServerInfo;
         private ShadowsocksController _ssController;
+        private int _oldSelectedItemIndex = -1;
 
         public ConfigForm(ShadowsocksController controller)
         {
@@ -35,7 +36,7 @@ namespace Shadowsocks.View
 
         private void ConfigForm_Load(object sender, EventArgs e)
         {
-
+            RenderConfigurationInfo(_currentConfiguration);
         }
 
         private void ConfigForm_Shown(object sender, EventArgs e)
@@ -50,66 +51,72 @@ namespace Shadowsocks.View
 
         private void lbxServersList_SelectedIndexChanged(object sender, EventArgs e)
         {
-            if (_oldSelectedIndex == lbxServersList.SelectedIndex)
-            {
-                // we are moving back to oldSelectedIndex or doing a force move
-                return;
-            }
-            if (!SaveOldSelectedServer())
+            var itemDisplayName = Convert.ToString(lbxServersList.SelectedItem);
+            _selectedSsServerInfo = _currentConfiguration.ServerInfos.Find(o => o.DisplayName() == itemDisplayName);
+
+            if (!CheckCurrentSelectedSsServerInfo())
             {
                 // why this won't cause stack overflow?
-                lbxServersList.SelectedIndex = _oldSelectedIndex;
+                lbxServersList.SelectedIndex = _oldSelectedItemIndex;
                 return;
             }
-            LoadSelectedServer();
-            _oldSelectedIndex = lbxServersList.SelectedIndex;
+
+            RenderSelectedSsServerInfo();
+
+            // Record the last selected item index
+            _oldSelectedItemIndex = lbxServersList.SelectedIndex;
         }
 
         private void btnAddItem_Click(object sender, EventArgs e)
         {
-            if (!SaveOldSelectedServer())
+            if (!CheckCurrentSelectedSsServerInfo())
             {
                 return;
             }
-            SsServerInfo server = Configuration.GetDefaultServer();
-            _modifiedConfiguration.ServerInfos.Add(server);
-            LoadConfiguration(_modifiedConfiguration);
-            lbxServersList.SelectedIndex = _modifiedConfiguration.ServerInfos.Count - 1;
-            _oldSelectedIndex = lbxServersList.SelectedIndex;
+
+            _currentConfiguration.ServerInfos.Add(Configuration.GetDefaultSsServerInfo());
+
+            RenderConfigurationInfo(_currentConfiguration);
+
+            // Select the last new added item
+            lbxServersList.SelectedIndex = _currentConfiguration.ServerInfos.Count - 1;
         }
 
         private void btnDeleteItem_Click(object sender, EventArgs e)
         {
-            _oldSelectedIndex = lbxServersList.SelectedIndex;
-            if (_oldSelectedIndex >= 0 && _oldSelectedIndex < _modifiedConfiguration.ServerInfos.Count)
+            if (_selectedSsServerInfo != null)
             {
-                _modifiedConfiguration.ServerInfos.RemoveAt(_oldSelectedIndex);
-            }
-            if (_oldSelectedIndex >= _modifiedConfiguration.ServerInfos.Count)
-            {
-                // can be -1
-                _oldSelectedIndex = _modifiedConfiguration.ServerInfos.Count - 1;
+                _currentConfiguration.ServerInfos.Remove(_selectedSsServerInfo);
             }
 
-            lbxServersList.SelectedIndex = _oldSelectedIndex;
-            LoadConfiguration(_modifiedConfiguration);
-            lbxServersList.SelectedIndex = _oldSelectedIndex;
+            // Make sure there are at least 1 ss-server-info
+            if (_currentConfiguration.ServerInfos.Count == 0)
+            {
+                _currentConfiguration.ServerInfos.Add(Configuration.GetDefaultSsServerInfo());
+            }
 
-            LoadSelectedServer();
+            RenderConfigurationInfo(_currentConfiguration);
         }
 
         private void btnOK_Click(object sender, EventArgs e)
         {
-            if (!SaveOldSelectedServer())
+            if (!CheckCurrentSelectedSsServerInfo())
             {
                 return;
             }
-            if (_modifiedConfiguration.ServerInfos.Count == 0)
+
+            if (!CheckCurrentGeneralConfigInfo())
+            {
+                return;
+            }
+
+            if (_currentConfiguration.ServerInfos.Count == 0)
             {
                 MessageBox.Show(I18N.GetString("Please add at least one server"));
                 return;
             }
-            _ssController.SaveServers(_modifiedConfiguration.ServerInfos, _modifiedConfiguration.localPort);
+
+            _ssController.SaveServers(_currentConfiguration.ServerInfos, _currentConfiguration.localPort);
             this.Close();
         }
 
@@ -146,84 +153,98 @@ namespace Shadowsocks.View
             tbxServerIP.Focus();
         }
 
-        private bool SaveOldSelectedServer()
+        private bool CheckCurrentSelectedSsServerInfo()
         {
             try
             {
-                if (_oldSelectedIndex == -1 || _oldSelectedIndex >= _modifiedConfiguration.ServerInfos.Count)
+                if (_selectedSsServerInfo == null)
                 {
                     return true;
                 }
-                SsServerInfo server = new SsServerInfo
-                {
-                    server = tbxServerIP.Text,
-                    server_port = int.Parse(tbxServerPort.Text),
-                    password = tbxPassword.Text,
-                    method = cbxEncryptions.Text,
-                    remarks = btnRemarks.Text
-                };
-                int localPort = int.Parse(btnProxyPort.Text);
-                Configuration.CheckServer(server);
-                Utils.IsPortValid(localPort);
-                _modifiedConfiguration.ServerInfos[_oldSelectedIndex] = server;
-                _modifiedConfiguration.localPort = localPort;
+
+                _selectedSsServerInfo.server = tbxServerIP.Text;
+                _selectedSsServerInfo.server_port = int.Parse(tbxServerPort.Text);
+                _selectedSsServerInfo.password = tbxPassword.Text;
+                _selectedSsServerInfo.method = cbxEncryptions.Text;
+                _selectedSsServerInfo.remarks = btnRemarks.Text;
+                Utils.IsSsServerInfoValid(_selectedSsServerInfo);
 
                 return true;
             }
-            catch (FormatException)
+            catch (Exception)
             {
                 MessageBox.Show(I18N.GetString("Illegal port number format"));
             }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.Message);
-            }
+
             return false;
         }
 
-        private void LoadSelectedServer()
+        private bool CheckCurrentGeneralConfigInfo()
         {
-            if (lbxServersList.SelectedIndex >= 0 && lbxServersList.SelectedIndex < _modifiedConfiguration.ServerInfos.Count)
+            try
             {
-                var server = _modifiedConfiguration.ServerInfos[lbxServersList.SelectedIndex];
+                var localPort = int.Parse(btnProxyPort.Text);
+                Utils.IsPortValid(localPort);
+                _currentConfiguration.localPort = localPort;
 
-                tbxServerIP.Text = server.server;
-                tbxServerPort.Text = server.server_port.ToString();
-                tbxPassword.Text = server.password;
-                btnProxyPort.Text = _modifiedConfiguration.localPort.ToString();
-                cbxEncryptions.Text = server.method ?? "aes-256-cfb";
-                btnRemarks.Text = server.remarks;
-                gbxServerConfigs.Visible = true;
-                //IPTextBox.Focus();
+                return true;
             }
-            else
+            catch (Exception)
             {
-                //ServerGroupBox.Visible = false;
+                MessageBox.Show(I18N.GetString("Illegal port number format"));
             }
-        }
 
-        private void LoadConfiguration(Configuration configuration)
-        {
-            lbxServersList.Items.Clear();
-            foreach (SsServerInfo server in _modifiedConfiguration.ServerInfos)
-            {
-                lbxServersList.Items.Add(server.FriendlyName());
-            }
+            return false;
         }
 
         private void LoadCurrentConfiguration()
         {
-            _modifiedConfiguration = _ssController.GetConfigurationCopy();
-            LoadConfiguration(_modifiedConfiguration);
+            _currentConfiguration = _ssController.GetConfigurationCopy();
+        }
 
-            _oldSelectedIndex = _modifiedConfiguration.index;
-            if (_oldSelectedIndex < 0)
+        private void RenderConfigurationInfo(Configuration configuration)
+        {
+            // Record the old selected-index
+            var oldSelectedIndex = lbxServersList.SelectedIndex;
+            if (oldSelectedIndex == -1)
             {
-                _oldSelectedIndex = 0;
+                oldSelectedIndex = configuration.selectedSsServerInfoIndex;
             }
 
-            lbxServersList.SelectedIndex = _oldSelectedIndex;
-            LoadSelectedServer();
+            // If the selected item has been removed, then select the last one instead
+            if (oldSelectedIndex >= configuration.ServerInfos.Count)
+            {
+                oldSelectedIndex = configuration.ServerInfos.Count - 1;
+            }
+
+            lbxServersList.Items.Clear();
+            foreach (SsServerInfo server in configuration.ServerInfos)
+            {
+                lbxServersList.Items.Add(server.DisplayName());
+            }
+
+            // Re-set back to the old selected-index
+            lbxServersList.SelectedIndex = oldSelectedIndex;
+
+            RenderSelectedSsServerInfo();
+        }
+
+        private void RenderSelectedSsServerInfo()
+        {
+            if (lbxServersList.SelectedIndex < 0 ||
+                lbxServersList.SelectedIndex >= _currentConfiguration.ServerInfos.Count)
+            {
+                return;
+            }
+
+            var server = _currentConfiguration.ServerInfos[lbxServersList.SelectedIndex];
+            tbxServerIP.Text = server.server;
+            tbxServerPort.Text = server.server_port.ToString();
+            tbxPassword.Text = server.password;
+            btnProxyPort.Text = _currentConfiguration.localPort.ToString();
+            cbxEncryptions.Text = server.method ?? "aes-256-cfb";
+            btnRemarks.Text = server.remarks;
+            gbxServerConfigs.Visible = true;
         }
     }
 }

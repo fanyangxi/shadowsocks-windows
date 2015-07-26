@@ -33,12 +33,12 @@ namespace Shadowsocks.Model
                 }
                 return new Configuration
                 {
-                    index = 0,
+                    selectedSsServerInfoIndex = 0,
                     isDefault = true,
                     localPort = 1080,
                     ServerInfos = new List<SsServerInfo>()
                     {
-                        GetDefaultServer()
+                        GetDefaultSsServerInfo()
                     }
                 };
             }
@@ -46,13 +46,13 @@ namespace Shadowsocks.Model
 
         public static void Save(Configuration config)
         {
-            if (config.index >= config.ServerInfos.Count)
+            if (config.selectedSsServerInfoIndex >= config.ServerInfos.Count)
             {
-                config.index = config.ServerInfos.Count - 1;
+                config.selectedSsServerInfoIndex = config.ServerInfos.Count - 1;
             }
-            if (config.index < -1)
+            if (config.selectedSsServerInfoIndex < -1)
             {
-                config.index = -1;
+                config.selectedSsServerInfoIndex = -1;
             }
             config.isDefault = false;
             try
@@ -70,10 +70,11 @@ namespace Shadowsocks.Model
             }
         }
 
+        // Proxy strategy (Balance / HighAvailability)
         public string strategy;
 
-        // when strategy is set, index is ignored
-        public int index;
+        // When strategy is set, index will be ignored
+        public int selectedSsServerInfoIndex;
 
         public bool global;
 
@@ -93,24 +94,17 @@ namespace Shadowsocks.Model
 
         public SsServerInfo GetCurrentServer()
         {
-            if (index >= 0 && index < ServerInfos.Count)
+            if (selectedSsServerInfoIndex >= 0 && selectedSsServerInfoIndex < ServerInfos.Count)
             {
-                return ServerInfos[index];
+                return ServerInfos[selectedSsServerInfoIndex];
             }
             else
             {
-                return GetDefaultServer();
+                return GetDefaultSsServerInfo();
             }
         }
 
-        public static void CheckServer(SsServerInfo server)
-        {
-            Utils.IsPortValid(server.server_port);
-            Utils.IsPasswordValid(server.password);
-            Utils.IsServerValid(server.server);
-        }
-
-        public static SsServerInfo GetDefaultServer()
+        public static SsServerInfo GetDefaultSsServerInfo()
         {
             return new SsServerInfo();
         }

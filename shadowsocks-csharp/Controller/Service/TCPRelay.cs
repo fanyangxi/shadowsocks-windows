@@ -378,7 +378,7 @@ namespace Shadowsocks.Controller
             {
                 strategy.SetFailure(server);
             }
-            Console.WriteLine(String.Format("{0} timed out", server.FriendlyName()));
+            Console.WriteLine(String.Format("{0} timed out", server.DisplayName()));
             remote.Close();
             RetryConnect();
         }
