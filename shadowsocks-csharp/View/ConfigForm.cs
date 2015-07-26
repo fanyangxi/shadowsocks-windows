@@ -25,10 +25,6 @@ namespace Shadowsocks.View
             this.Font = System.Drawing.SystemFonts.MessageBoxFont;
             InitializeComponent();
 
-            // a dirty hack
-            this.ServersListBox.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.PerformLayout();
-
             UpdateTexts();
             this.Icon = Icon.FromHandle(Resources.ssw128.GetHicon());
 
@@ -58,7 +54,7 @@ namespace Shadowsocks.View
         {
             LoadCurrentConfiguration();
         }
-        
+
         private void ShowWindow()
         {
             this.Opacity = 1;
@@ -84,10 +80,10 @@ namespace Shadowsocks.View
                 };
                 int localPort = int.Parse(ProxyPortTextBox.Text);
                 Configuration.CheckServer(server);
-                Configuration.CheckPort(localPort);
+                Configuration.IsPortValid(localPort);
                 _modifiedConfiguration.configs[_oldSelectedIndex] = server;
                 _modifiedConfiguration.localPort = localPort;
-                
+
                 return true;
             }
             catch (FormatException)

@@ -6,6 +6,9 @@ using System.Text.RegularExpressions;
 
 namespace Shadowsocks.Controller
 {
+    /// <summary>
+    /// i18n（其来源是英文单词 internationalization的首末字符i和n，18为中间的字符数）是“国际化”的简称。
+    /// </summary>
     public class I18N
     {
         protected static Dictionary<string, string> Strings;

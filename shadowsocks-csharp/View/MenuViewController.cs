@@ -18,7 +18,7 @@ namespace Shadowsocks.View
         // yes this is just a menu view controller
         // when config form is closed, it moves away from RAM
         // and it should just do anything related to the config form
-        
+
         private ShadowsocksController controller;
         private UpdateChecker updateChecker;
 
@@ -106,6 +106,7 @@ namespace Shadowsocks.View
             {
                 icon = Resources.ss24;
             }
+
             Configuration config = controller.GetConfigurationCopy();
             bool enabled = config.enabled;
             bool global = config.global;
@@ -181,6 +182,13 @@ namespace Shadowsocks.View
                 new MenuItem("-"),
                 CreateMenuItem("Show Logs...", new EventHandler(this.ShowLogItem_Click)),
                 CreateMenuItem("About...", new EventHandler(this.AboutItem_Click)),
+                new MenuItem("-"),
+                //CreateMenuGroup("Update Free Servers", new MenuItem[] {
+                //    CreateMenuItem("From iShadowsocks", new EventHandler(this.UpdateFreeServersFromiShadowsocks_Click)),
+                //    CreateMenuItem("From SS-Link", new EventHandler(this.UpdateFreeServersFromSSLink_Click)),
+                //    new MenuItem("-"),
+                //}),
+                CreateMenuItem("Update Free Servers", new EventHandler(this.UpdateFreeServers_Click)),
                 new MenuItem("-"),
                 CreateMenuItem("Quit", new EventHandler(this.Quit_Click))
             });
@@ -340,7 +348,7 @@ namespace Shadowsocks.View
             if (_isFirstRun)
             {
                 _notifyIcon.BalloonTipTitle = I18N.GetString("Shadowsocks is here");
-                _notifyIcon.BalloonTipText =  I18N.GetString("You can turn on/off Shadowsocks in the context menu");
+                _notifyIcon.BalloonTipText = I18N.GetString("You can turn on/off Shadowsocks in the context menu");
                 _notifyIcon.BalloonTipIcon = ToolTipIcon.Info;
                 _notifyIcon.ShowBalloonTip(0);
                 _isFirstRun = false;
@@ -350,6 +358,21 @@ namespace Shadowsocks.View
         private void AboutItem_Click(object sender, EventArgs e)
         {
             Process.Start("https://github.com/shadowsocks/shadowsocks-csharp");
+        }
+
+        private void UpdateFreeServers_Click(object sender, EventArgs e)
+        {
+            //throw new NotImplementedException();
+        }
+
+        private void UpdateFreeServersFromiShadowsocks_Click(object sender, EventArgs e)
+        {
+            //throw new NotImplementedException();
+        }
+
+        private void UpdateFreeServersFromSSLink_Click(object sender, EventArgs e)
+        {
+            //throw new NotImplementedException();
         }
 
         private void notifyIcon1_DoubleClick(object sender, MouseEventArgs e)
@@ -517,12 +540,14 @@ namespace Shadowsocks.View
             Process.Start(_urlToOpen);
         }
 
-		private void AutoStartupItem_Click(object sender, EventArgs e) {
-			AutoStartupItem.Checked = !AutoStartupItem.Checked;
-			if (!AutoStartup.Set(AutoStartupItem.Checked)) {
-				MessageBox.Show(I18N.GetString("Failed to update registry"));
-			}
-		}
+        private void AutoStartupItem_Click(object sender, EventArgs e)
+        {
+            AutoStartupItem.Checked = !AutoStartupItem.Checked;
+            if (!AutoStartup.Set(AutoStartupItem.Checked))
+            {
+                MessageBox.Show(I18N.GetString("Failed to update registry"));
+            }
+        }
 
         private void LocalPACItem_Click(object sender, EventArgs e)
         {

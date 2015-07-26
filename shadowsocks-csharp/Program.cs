@@ -34,14 +34,13 @@ namespace Shadowsocks
                     MessageBox.Show("Shadowsocks is already running.\n\nFind Shadowsocks icon in your notify tray.");
                     return;
                 }
+
                 Directory.SetCurrentDirectory(Application.StartupPath);
 #if !DEBUG
                 Logging.OpenLogFile();
 #endif
-                ShadowsocksController controller = new ShadowsocksController();
-
-                MenuViewController viewController = new MenuViewController(controller);
-
+                var controller = new ShadowsocksController();
+                var viewController = new MenuViewController(controller);
                 controller.Start();
 
                 Application.Run();

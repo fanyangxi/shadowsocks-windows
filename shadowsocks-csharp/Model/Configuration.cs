@@ -39,17 +39,17 @@ namespace Shadowsocks.Model
 
         public static void CheckServer(Server server)
         {
-            CheckPort(server.server_port);
-            CheckPassword(server.password);
-            CheckServer(server.server);
+            IsPortValid(server.server_port);
+            IsPasswordValid(server.password);
+            IsServerValid(server.server);
         }
 
         public static Configuration Load()
         {
             try
             {
-                string configContent = File.ReadAllText(CONFIG_FILE);
-                Configuration config = SimpleJson.SimpleJson.DeserializeObject<Configuration>(configContent, new JsonSerializerStrategy());
+                var configContent = File.ReadAllText(CONFIG_FILE);
+                var config = SimpleJson.SimpleJson.DeserializeObject<Configuration>(configContent, new JsonSerializerStrategy());
                 config.isDefault = false;
                 if (config.localPort == 0)
                 {
@@ -115,7 +115,7 @@ namespace Shadowsocks.Model
             }
         }
 
-        public static void CheckPort(int port)
+        public static void IsPortValid(int port)
         {
             if (port <= 0 || port > 65535)
             {
@@ -123,11 +123,11 @@ namespace Shadowsocks.Model
             }
             if (port == 8123)
             {
-                throw new ArgumentException(I18N.GetString("Port can't be 8123"));
+                throw new ArgumentException(I18N.GetString("Port is not allowed to be 8123"));
             }
         }
 
-        private static void CheckPassword(string password)
+        private static void IsPasswordValid(string password)
         {
             if (string.IsNullOrEmpty(password))
             {
@@ -135,7 +135,7 @@ namespace Shadowsocks.Model
             }
         }
 
-        private static void CheckServer(string server)
+        private static void IsServerValid(string server)
         {
             if (string.IsNullOrEmpty(server))
             {

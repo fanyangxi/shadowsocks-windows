@@ -335,13 +335,11 @@ namespace Shadowsocks.Controller
             Util.Utils.ReleaseMemory();
         }
 
-
         protected void SaveConfig(Configuration newConfig)
         {
             Configuration.Save(newConfig);
             Reload();
         }
-
 
         private void UpdateSystemProxy()
         {
