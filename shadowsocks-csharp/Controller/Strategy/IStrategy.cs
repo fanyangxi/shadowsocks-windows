@@ -31,26 +31,26 @@ namespace Shadowsocks.Controller.Strategy
         /*
          * Get a new server to use in TCPRelay or UDPRelay
          */
-        Server GetAServer(IStrategyCallerType type, IPEndPoint localIPEndPoint);
+        SsServerInfo GetAServer(IStrategyCallerType type, IPEndPoint localIPEndPoint);
 
         /*
          * TCPRelay will call this when latency of a server detected
          */
-        void UpdateLatency(Server server, TimeSpan latency);
+        void UpdateLatency(SsServerInfo server, TimeSpan latency);
 
         /*
          * TCPRelay will call this when reading from a server
          */
-        void UpdateLastRead(Server server);
+        void UpdateLastRead(SsServerInfo server);
 
         /*
          * TCPRelay will call this when writing to a server
          */
-        void UpdateLastWrite(Server server);
+        void UpdateLastWrite(SsServerInfo server);
 
         /*
          * TCPRelay will call this when fatal failure detected
          */
-        void SetFailure(Server server);
+        void SetFailure(SsServerInfo server);
     }
 }

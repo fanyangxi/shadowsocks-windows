@@ -1,6 +1,5 @@
 ﻿using Shadowsocks.Model;
 using Shadowsocks.Properties;
-using Shadowsocks.Util;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -46,7 +45,7 @@ namespace Shadowsocks.Controller
                 bool hostMatch = false, pathMatch = false, useSocks = false;
                 foreach (string line in lines)
                 {
-                    string[] kv = line.Split(new char[]{':'}, 2);
+                    string[] kv = line.Split(new char[] { ':' }, 2);
                     if (kv.Length == 2)
                     {
                         if (kv[0] == "Host")
@@ -138,15 +137,13 @@ namespace Shadowsocks.Controller
                 pac = pac.Replace("__PROXY__", proxy);
 
                 string text = String.Format(@"HTTP/1.1 200 OK
-Server: Shadowsocks
-Content-Type: application/x-ns-proxy-autoconfig
-Content-Length: {0}
-Connection: Close
-
-", System.Text.Encoding.UTF8.GetBytes(pac).Length) + pac;
+                    Server: Shadowsocks
+                    Content-Type: application/x-ns-proxy-autoconfig
+                    Content-Length: {0}
+                    Connection: Close", System.Text.Encoding.UTF8.GetBytes(pac).Length) + pac;
                 byte[] response = System.Text.Encoding.UTF8.GetBytes(text);
                 socket.BeginSend(response, 0, response.Length, 0, new AsyncCallback(SendCallback), socket);
-                Util.Utils.ReleaseMemory();
+                Utils.ReleaseMemory();
             }
             catch (Exception e)
             {

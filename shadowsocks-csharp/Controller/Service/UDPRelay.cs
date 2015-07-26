@@ -48,13 +48,13 @@ namespace Shadowsocks.Controller
             private Socket _local;
             private Socket _remote;
 
-            private Server _server;
+            private SsServerInfo _server;
             private byte[] _buffer = new byte[1500];
 
             private IPEndPoint _localEndPoint;
             private IPEndPoint _remoteEndPoint;
 
-            public UDPHandler(Socket local, Server server, IPEndPoint localEndPoint)
+            public UDPHandler(Socket local, SsServerInfo server, IPEndPoint localEndPoint)
             {
                 _local = local;
                 _server = server;

@@ -43,7 +43,7 @@ namespace Shadowsocks.Controller
     {
         //public Encryptor encryptor;
         public IEncryptor encryptor;
-        public Server server;
+        public SsServerInfo server;
         // Client  socket.
         public Socket remote;
         public Socket connection;
@@ -82,7 +82,7 @@ namespace Shadowsocks.Controller
 
         public void CreateRemote()
         {
-            Server server = controller.GetAServer(IStrategyCallerType.TCP, (IPEndPoint)connection.RemoteEndPoint);
+            SsServerInfo server = controller.GetAServer(IStrategyCallerType.TCP, (IPEndPoint)connection.RemoteEndPoint);
             this.encryptor = EncryptorFactory.GetEncryptor(server.method, server.password);
             this.server = server;
         }
@@ -319,7 +319,7 @@ namespace Shadowsocks.Controller
 
         private class ServerTimer : Timer
         {
-            public Server Server;
+            public SsServerInfo Server;
 
             public ServerTimer(int p) :base(p)
             {
@@ -372,7 +372,7 @@ namespace Shadowsocks.Controller
             {
                 return;
             }
-            Server server = ((ServerTimer)sender).Server;
+            SsServerInfo server = ((ServerTimer)sender).Server;
             IStrategy strategy = controller.GetCurrentStrategy();
             if (strategy != null)
             {
@@ -399,7 +399,7 @@ namespace Shadowsocks.Controller
 
         private void ConnectCallback(IAsyncResult ar)
         {
-            Server server = null;
+            SsServerInfo server = null;
             if (closed)
             {
                 return;

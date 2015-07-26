@@ -10,39 +10,7 @@ namespace Shadowsocks.Model
     [Serializable]
     public class Configuration
     {
-        public List<Server> configs;
-
-        // when strategy is set, index is ignored
-        public string strategy;
-        public int index;
-        public bool global;
-        public bool enabled;
-        public bool shareOverLan;
-        public bool isDefault;
-        public int localPort;
-        public string pacUrl;
-        public bool useOnlinePac;
-
         private static string CONFIG_FILE = "gui-config.json";
-
-        public Server GetCurrentServer()
-        {
-            if (index >= 0 && index < configs.Count)
-            {
-                return configs[index];
-            }
-            else
-            {
-                return GetDefaultServer();
-            }
-        }
-
-        public static void CheckServer(Server server)
-        {
-            IsPortValid(server.server_port);
-            IsPasswordValid(server.password);
-            IsServerValid(server.server);
-        }
 
         public static Configuration Load()
         {
@@ -68,7 +36,7 @@ namespace Shadowsocks.Model
                     index = 0,
                     isDefault = true,
                     localPort = 1080,
-                    configs = new List<Server>()
+                    ServerInfos = new List<SsServerInfo>()
                     {
                         GetDefaultServer()
                     }
@@ -78,9 +46,9 @@ namespace Shadowsocks.Model
 
         public static void Save(Configuration config)
         {
-            if (config.index >= config.configs.Count)
+            if (config.index >= config.ServerInfos.Count)
             {
-                config.index = config.configs.Count - 1;
+                config.index = config.ServerInfos.Count - 1;
             }
             if (config.index < -1)
             {
@@ -102,45 +70,49 @@ namespace Shadowsocks.Model
             }
         }
 
-        public static Server GetDefaultServer()
+        public string strategy;
+
+        // when strategy is set, index is ignored
+        public int index;
+
+        public bool global;
+
+        public bool enabled;
+
+        public bool shareOverLan;
+
+        public bool isDefault;
+
+        public int localPort;
+
+        public string pacUrl;
+
+        public bool useOnlinePac;
+
+        public List<SsServerInfo> ServerInfos { get; set; }
+
+        public SsServerInfo GetCurrentServer()
         {
-            return new Server();
+            if (index >= 0 && index < ServerInfos.Count)
+            {
+                return ServerInfos[index];
+            }
+            else
+            {
+                return GetDefaultServer();
+            }
         }
 
-        private static void Assert(bool condition)
+        public static void CheckServer(SsServerInfo server)
         {
-            if (!condition)
-            {
-                throw new Exception(I18N.GetString("assertion failure"));
-            }
+            Utils.IsPortValid(server.server_port);
+            Utils.IsPasswordValid(server.password);
+            Utils.IsServerValid(server.server);
         }
 
-        public static void IsPortValid(int port)
+        public static SsServerInfo GetDefaultServer()
         {
-            if (port <= 0 || port > 65535)
-            {
-                throw new ArgumentException(I18N.GetString("Port out of range"));
-            }
-            if (port == 8123)
-            {
-                throw new ArgumentException(I18N.GetString("Port is not allowed to be 8123"));
-            }
-        }
-
-        private static void IsPasswordValid(string password)
-        {
-            if (string.IsNullOrEmpty(password))
-            {
-                throw new ArgumentException(I18N.GetString("Password can not be blank"));
-            }
-        }
-
-        private static void IsServerValid(string server)
-        {
-            if (string.IsNullOrEmpty(server))
-            {
-                throw new ArgumentException(I18N.GetString("Server IP can not be blank"));
-            }
+            return new SsServerInfo();
         }
 
         private class JsonSerializerStrategy : SimpleJson.PocoJsonSerializerStrategy
@@ -152,6 +124,7 @@ namespace Shadowsocks.Model
                 {
                     return Int32.Parse(value.ToString());
                 }
+
                 return base.DeserializeObject(value, type);
             }
         }

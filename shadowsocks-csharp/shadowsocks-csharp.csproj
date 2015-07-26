@@ -144,7 +144,7 @@
     <Compile Include="Encryption\TableEncryptor.cs" />
     <Compile Include="Encryption\IEncryptor.cs" />
     <Compile Include="Controller\Service\PACServer.cs" />
-    <Compile Include="Model\Server.cs" />
+    <Compile Include="Model\SsServerInfo.cs" />
     <Compile Include="Model\Configuration.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
@@ -154,7 +154,7 @@
     <Compile Include="Controller\Strategy\BalancingStrategy.cs" />
     <Compile Include="Controller\Strategy\StrategyManager.cs" />
     <Compile Include="Controller\Strategy\IStrategy.cs" />
-    <Compile Include="Util\Util.cs" />
+    <Compile Include="Util\Utils.cs" />
     <Compile Include="View\ConfigForm.cs">
       <SubType>Form</SubType>
     </Compile>

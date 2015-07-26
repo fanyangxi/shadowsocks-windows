@@ -5,7 +5,6 @@ using System.Net;
 using System.IO;
 using Shadowsocks.Properties;
 using SimpleJson;
-using Shadowsocks.Util;
 using Shadowsocks.Model;
 
 namespace Shadowsocks.Controller
@@ -41,7 +40,7 @@ namespace Shadowsocks.Controller
                 {
                     string local = File.ReadAllText(USER_RULE_FILE, Encoding.UTF8);
                     string[] rules = local.Split(new char[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
-                    foreach(string rule in rules)
+                    foreach (string rule in rules)
                     {
                         if (rule.StartsWith("!") || rule.StartsWith("["))
                             continue;

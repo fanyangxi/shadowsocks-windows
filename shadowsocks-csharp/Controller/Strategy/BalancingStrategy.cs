@@ -33,9 +33,9 @@ namespace Shadowsocks.Controller.Strategy
             // do nothing
         }
 
-        public Server GetAServer(IStrategyCallerType type, IPEndPoint localIPEndPoint)
+        public SsServerInfo GetAServer(IStrategyCallerType type, IPEndPoint localIPEndPoint)
         {
-            var configs = _controller.GetCurrentConfiguration().configs;
+            var configs = _controller.GetCurrentConfiguration().ServerInfos;
             int index;
             if (type == IStrategyCallerType.TCP)
             {
@@ -48,22 +48,22 @@ namespace Shadowsocks.Controller.Strategy
             return configs[index % configs.Count];
         }
 
-        public void UpdateLatency(Model.Server server, TimeSpan latency)
+        public void UpdateLatency(Model.SsServerInfo server, TimeSpan latency)
         {
             // do nothing
         }
 
-        public void UpdateLastRead(Model.Server server)
+        public void UpdateLastRead(Model.SsServerInfo server)
         {
             // do nothing
         }
 
-        public void UpdateLastWrite(Model.Server server)
+        public void UpdateLastWrite(Model.SsServerInfo server)
         {
             // do nothing
         }
 
-        public void SetFailure(Model.Server server)
+        public void SetFailure(Model.SsServerInfo server)
         {
             // do nothing
         }

@@ -291,7 +291,7 @@ namespace Shadowsocks.View
             }
             int strategyCount = i;
             Configuration configuration = controller.GetConfigurationCopy();
-            foreach (var server in configuration.configs)
+            foreach (var server in configuration.ServerInfos)
             {
                 MenuItem item = new MenuItem(server.FriendlyName());
                 item.Tag = i - strategyCount;
@@ -327,7 +327,7 @@ namespace Shadowsocks.View
         void configForm_FormClosed(object sender, FormClosedEventArgs e)
         {
             configForm = null;
-            Util.Utils.ReleaseMemory();
+            Utils.ReleaseMemory();
             ShowFirstTimeBalloon();
         }
 

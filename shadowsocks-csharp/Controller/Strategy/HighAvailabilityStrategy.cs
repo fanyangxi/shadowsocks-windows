@@ -7,8 +7,8 @@ namespace Shadowsocks.Controller.Strategy
 {
     class HighAvailabilityStrategy : IStrategy
     {
-        protected Server _currentServer;
-        protected Dictionary<Server, ServerStatus> _serverStatus;
+        protected SsServerInfo _currentServer;
+        protected Dictionary<SsServerInfo, ServerStatus> _serverStatus;
         ShadowsocksController _controller;
         Random _random;
 
@@ -27,7 +27,7 @@ namespace Shadowsocks.Controller.Strategy
             // connection refused or closed before anything received
             public DateTime lastFailure;
 
-            public Server server;
+            public SsServerInfo server;
 
             public double score;
         }
@@ -36,7 +36,7 @@ namespace Shadowsocks.Controller.Strategy
         {
             _controller = controller;
             _random = new Random();
-            _serverStatus = new Dictionary<Server, ServerStatus>();
+            _serverStatus = new Dictionary<SsServerInfo, ServerStatus>();
         }
 
         public string Name
@@ -52,9 +52,9 @@ namespace Shadowsocks.Controller.Strategy
         public void ReloadServers()
         {
             // make a copy to avoid locking
-            var newServerStatus = new Dictionary<Server, ServerStatus>(_serverStatus);
+            var newServerStatus = new Dictionary<SsServerInfo, ServerStatus>(_serverStatus);
 
-            foreach (var server in _controller.GetCurrentConfiguration().configs)
+            foreach (var server in _controller.GetCurrentConfiguration().ServerInfos)
             {
                 if (!newServerStatus.ContainsKey(server))
                 {
@@ -73,7 +73,7 @@ namespace Shadowsocks.Controller.Strategy
             ChooseNewServer();
         }
 
-        public Server GetAServer(IStrategyCallerType type, System.Net.IPEndPoint localIPEndPoint)
+        public SsServerInfo GetAServer(IStrategyCallerType type, System.Net.IPEndPoint localIPEndPoint)
         {
             if (type == IStrategyCallerType.TCP)
             {
@@ -90,7 +90,7 @@ namespace Shadowsocks.Controller.Strategy
          */
         public void ChooseNewServer()
         {
-            Server oldServer = _currentServer;
+            SsServerInfo oldServer = _currentServer;
             List<ServerStatus> servers = new List<ServerStatus>(_serverStatus.Values);
             DateTime now = DateTime.Now;
             foreach (var status in servers)
@@ -129,7 +129,7 @@ namespace Shadowsocks.Controller.Strategy
             }
         }
 
-        public void UpdateLatency(Model.Server server, TimeSpan latency)
+        public void UpdateLatency(Model.SsServerInfo server, TimeSpan latency)
         {
             Logging.Debug(String.Format("latency: {0} {1}", server.FriendlyName(), latency));
 
@@ -141,7 +141,7 @@ namespace Shadowsocks.Controller.Strategy
             }
         }
 
-        public void UpdateLastRead(Model.Server server)
+        public void UpdateLastRead(Model.SsServerInfo server)
         {
             Logging.Debug(String.Format("last read: {0}", server.FriendlyName()));
 
@@ -152,7 +152,7 @@ namespace Shadowsocks.Controller.Strategy
             }
         }
 
-        public void UpdateLastWrite(Model.Server server)
+        public void UpdateLastWrite(Model.SsServerInfo server)
         {
             Logging.Debug(String.Format("last write: {0}", server.FriendlyName()));
 
@@ -163,7 +163,7 @@ namespace Shadowsocks.Controller.Strategy
             }
         }
 
-        public void SetFailure(Model.Server server)
+        public void SetFailure(Model.SsServerInfo server)
         {
             Logging.Debug(String.Format("failure: {0}", server.FriendlyName()));
 

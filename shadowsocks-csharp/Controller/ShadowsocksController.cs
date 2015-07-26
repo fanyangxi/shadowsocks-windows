@@ -68,7 +68,7 @@ namespace Shadowsocks.Controller
             }
         }
 
-        public Server GetCurrentServer()
+        public SsServerInfo GetCurrentServer()
         {
             return _config.GetCurrentServer();
         }
@@ -102,7 +102,7 @@ namespace Shadowsocks.Controller
             return null;
         }
 
-        public Server GetAServer(IStrategyCallerType type, IPEndPoint localIPEndPoint)
+        public SsServerInfo GetAServer(IStrategyCallerType type, IPEndPoint localIPEndPoint)
         {
             IStrategy strategy = GetCurrentStrategy();
             if (strategy != null)
@@ -112,9 +112,9 @@ namespace Shadowsocks.Controller
             return GetCurrentServer();
         }
 
-        public void SaveServers(List<Server> servers, int localPort)
+        public void SaveServers(List<SsServerInfo> servers, int localPort)
         {
-            _config.configs = servers;
+            _config.ServerInfos = servers;
             _config.localPort = localPort;
             SaveConfig(_config);
         }
@@ -123,9 +123,9 @@ namespace Shadowsocks.Controller
         {
             try
             {
-                var server = new Server(ssURL);
-                _config.configs.Add(server);
-                _config.index = _config.configs.Count - 1;
+                var server = new SsServerInfo(ssURL);
+                _config.ServerInfos.Add(server);
+                _config.index = _config.ServerInfos.Count - 1;
                 SaveConfig(_config);
                 return true;
             }
@@ -223,7 +223,7 @@ namespace Shadowsocks.Controller
 
         public string GetQRCodeForCurrentServer()
         {
-            Server server = GetCurrentServer();
+            SsServerInfo server = GetCurrentServer();
             string parts = server.method + ":" + server.password + "@" + server.server + ":" + server.server_port;
             string base64 = System.Convert.ToBase64String(Encoding.UTF8.GetBytes(parts));
             return "ss://" + base64;
@@ -332,7 +332,7 @@ namespace Shadowsocks.Controller
             }
 
             UpdateSystemProxy();
-            Util.Utils.ReleaseMemory();
+            Utils.ReleaseMemory();
         }
 
         protected void SaveConfig(Configuration newConfig)
@@ -387,7 +387,7 @@ namespace Shadowsocks.Controller
         {
             while (true)
             {
-                Util.Utils.ReleaseMemory();
+                Utils.ReleaseMemory();
                 Thread.Sleep(30 * 1000);
             }
         }
