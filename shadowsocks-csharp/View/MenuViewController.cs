@@ -217,7 +217,7 @@ namespace Shadowsocks.View
             PACModeItem.Checked = !globalModeItem.Checked;
         }
 
-        void controller_FileReadyToOpen(object sender, ShadowsocksController.PathEventArgs e)
+        void controller_FileReadyToOpen(object sender, PathEventArgs e)
         {
             string argument = @"/select, " + e.Path;
 

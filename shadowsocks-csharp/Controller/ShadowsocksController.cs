@@ -10,13 +10,14 @@ using System.Net;
 
 namespace Shadowsocks.Controller
 {
+    /// <summary>
+    /// Controller:
+    /// - handle user actions
+    /// - manipulates UI
+    /// - interacts with low level logic
+    /// </summary>
     public class ShadowsocksController
     {
-        // controller:
-        // handle user actions
-        // manipulates UI
-        // interacts with low level logic
-
         private Thread _ramThread;
 
         private Listener _listener;
@@ -29,18 +30,17 @@ namespace Shadowsocks.Controller
 
         private bool _systemProxyIsDirty = false;
 
-        public class PathEventArgs : EventArgs
-        {
-            public string Path;
-        }
-
         public event EventHandler ConfigChanged;
+
         public event EventHandler EnableStatusChanged;
+
         public event EventHandler EnableGlobalChanged;
+
         public event EventHandler ShareOverLANStatusChanged;
 
-        // when user clicked Edit PAC, and PAC file has already created
+        // When user clicked Edit PAC, and PAC file has already created
         public event EventHandler<PathEventArgs> PACFileReadyToOpen;
+
         public event EventHandler<PathEventArgs> UserRuleFileReadyToOpen;
 
         public event EventHandler<GFWListUpdater.ResultEventArgs> UpdatePACFromGFWListCompleted;
@@ -48,6 +48,14 @@ namespace Shadowsocks.Controller
         public event ErrorEventHandler UpdatePACFromGFWListError;
 
         public event ErrorEventHandler Errored;
+
+        protected void ReportError(Exception e)
+        {
+            if (Errored != null)
+            {
+                Errored(this, new ErrorEventArgs(e));
+            }
+        }
 
         public ShadowsocksController()
         {
@@ -58,14 +66,6 @@ namespace Shadowsocks.Controller
         public void Start()
         {
             Reload();
-        }
-
-        protected void ReportError(Exception e)
-        {
-            if (Errored != null)
-            {
-                Errored(this, new ErrorEventArgs(e));
-            }
         }
 
         public SsServerInfo GetCurrentServer()
@@ -117,11 +117,17 @@ namespace Shadowsocks.Controller
         /// Other options of the config is not maintained in the config-form, 
         /// so we only pass in two params (servers and port).
         /// </summary>
-        /// <param name="servers">Updated server infos</param>
+        /// <param name="serverInfos">Updated server infos</param>
         /// <param name="localPort">Update local port</param>
-        public void SaveServers(List<SsServerInfo> servers, int localPort)
+        public void SaveServers(List<SsServerInfo> serverInfos, int localPort)
         {
-            _config.ServerInfos = servers;
+            //if (serverInfos.Count == 0)
+            //{
+            //    MessageBox.Show(I18N.GetString("Please add at least one server"));
+            //    return;
+            //}
+
+            _config.ServerInfos = serverInfos;
             _config.localPort = localPort;
 
             SaveConfig(_config);
@@ -134,6 +140,7 @@ namespace Shadowsocks.Controller
                 var server = new SsServerInfo(ssURL);
                 _config.ServerInfos.Add(server);
                 _config.selectedSsServerInfoIndex = _config.ServerInfos.Count - 1;
+
                 SaveConfig(_config);
                 return true;
             }
@@ -149,6 +156,7 @@ namespace Shadowsocks.Controller
             _config.enabled = enabled;
             UpdateSystemProxy();
             SaveConfig(_config);
+
             if (EnableStatusChanged != null)
             {
                 EnableStatusChanged(this, new EventArgs());
@@ -160,6 +168,7 @@ namespace Shadowsocks.Controller
             _config.global = global;
             UpdateSystemProxy();
             SaveConfig(_config);
+
             if (EnableGlobalChanged != null)
             {
                 EnableGlobalChanged(this, new EventArgs());
@@ -170,6 +179,7 @@ namespace Shadowsocks.Controller
         {
             _config.shareOverLan = enabled;
             SaveConfig(_config);
+
             if (ShareOverLANStatusChanged != null)
             {
                 ShareOverLANStatusChanged(this, new EventArgs());
@@ -196,15 +206,18 @@ namespace Shadowsocks.Controller
             {
                 return;
             }
+
             stopped = true;
             if (_listener != null)
             {
                 _listener.Stop();
             }
+
             if (polipoRunner != null)
             {
                 polipoRunner.Stop();
             }
+
             if (_config.enabled)
             {
                 SystemProxy.Update(_config, true);
@@ -213,7 +226,7 @@ namespace Shadowsocks.Controller
 
         public void TouchPACFile()
         {
-            string pacFilename = _pacServer.TouchPACFile();
+            var pacFilename = _pacServer.TouchPACFile();
             if (PACFileReadyToOpen != null)
             {
                 PACFileReadyToOpen(this, new PathEventArgs() { Path = pacFilename });

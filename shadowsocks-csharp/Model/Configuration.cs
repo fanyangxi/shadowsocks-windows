@@ -50,10 +50,12 @@ namespace Shadowsocks.Model
             {
                 config.selectedSsServerInfoIndex = config.ServerInfos.Count - 1;
             }
+
             if (config.selectedSsServerInfoIndex < -1)
             {
                 config.selectedSsServerInfoIndex = -1;
             }
+
             config.isDefault = false;
             try
             {

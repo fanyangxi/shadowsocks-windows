@@ -60,8 +60,9 @@ namespace Shadowsocks
         public static void IsSsServerInfoValid(SsServerInfo server)
         {
             Utils.IsPortValid(server.server_port);
-            Utils.IsPasswordValid(server.password);
-            Utils.IsServerValid(server.server);
+            Utils.IsPasswordNotEmpty(server.password);
+            Utils.IsServerIPNotEmpty(server.server);
+            Utils.IsServerIPNotEmpty(server.method);
         }
 
         public static void IsPortValid(int port)
@@ -76,7 +77,7 @@ namespace Shadowsocks
             }
         }
 
-        public static void IsPasswordValid(string password)
+        public static void IsPasswordNotEmpty(string password)
         {
             if (string.IsNullOrEmpty(password))
             {
@@ -84,7 +85,7 @@ namespace Shadowsocks
             }
         }
 
-        public static void IsServerValid(string server)
+        public static void IsServerIPNotEmpty(string server)
         {
             if (string.IsNullOrEmpty(server))
             {
@@ -92,5 +93,12 @@ namespace Shadowsocks
             }
         }
 
+        public static void IsEncryptionNotEmpty(string encryption)
+        {
+            if (string.IsNullOrEmpty(encryption))
+            {
+                throw new ArgumentException(I18N.GetString("Encryption method can not be blank"));
+            }
+        }
     }
 }

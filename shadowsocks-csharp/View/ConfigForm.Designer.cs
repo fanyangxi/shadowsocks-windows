@@ -45,9 +45,10 @@
             this.btnAddItem = new System.Windows.Forms.Button();
             this.gbxServerConfigs = new System.Windows.Forms.GroupBox();
             this.lbxServersList = new System.Windows.Forms.ListBox();
-            this.btnProxyPort = new System.Windows.Forms.TextBox();
+            this.btnLocalProxyPort = new System.Windows.Forms.TextBox();
             this.ProxyPortLabel = new System.Windows.Forms.Label();
             this.gbxGeneral = new System.Windows.Forms.GroupBox();
+            this.lblStatus = new System.Windows.Forms.Label();
             this.gbxServerConfigs.SuspendLayout();
             this.gbxGeneral.SuspendLayout();
             this.SuspendLayout();
@@ -60,6 +61,7 @@
             this.btnRemarks.Size = new System.Drawing.Size(160, 21);
             this.btnRemarks.TabIndex = 10;
             this.btnRemarks.WordWrap = false;
+            this.btnRemarks.TextChanged += new System.EventHandler(this.ViewTextBox_TextChanged);
             // 
             // RemarksLabel
             // 
@@ -105,6 +107,7 @@
             this.tbxServerIP.Size = new System.Drawing.Size(160, 21);
             this.tbxServerIP.TabIndex = 0;
             this.tbxServerIP.WordWrap = false;
+            this.tbxServerIP.TextChanged += new System.EventHandler(this.ViewTextBox_TextChanged);
             // 
             // tbxServerPort
             // 
@@ -114,6 +117,7 @@
             this.tbxServerPort.Size = new System.Drawing.Size(160, 21);
             this.tbxServerPort.TabIndex = 1;
             this.tbxServerPort.WordWrap = false;
+            this.tbxServerPort.TextChanged += new System.EventHandler(this.ViewTextBox_TextChanged);
             // 
             // tbxPassword
             // 
@@ -124,6 +128,7 @@
             this.tbxPassword.Size = new System.Drawing.Size(160, 21);
             this.tbxPassword.TabIndex = 2;
             this.tbxPassword.WordWrap = false;
+            this.tbxPassword.TextChanged += new System.EventHandler(this.ViewTextBox_TextChanged);
             // 
             // EncryptionLabel
             // 
@@ -153,6 +158,7 @@
             this.cbxEncryptions.Name = "cbxEncryptions";
             this.cbxEncryptions.Size = new System.Drawing.Size(160, 20);
             this.cbxEncryptions.TabIndex = 3;
+            this.cbxEncryptions.SelectedIndexChanged += new System.EventHandler(this.cbxEncryptions_SelectedIndexChanged);
             // 
             // panel2
             // 
@@ -245,14 +251,15 @@
             this.lbxServersList.TabIndex = 5;
             this.lbxServersList.SelectedIndexChanged += new System.EventHandler(this.lbxServersList_SelectedIndexChanged);
             // 
-            // btnProxyPort
+            // btnLocalProxyPort
             // 
-            this.btnProxyPort.Location = new System.Drawing.Point(81, 19);
-            this.btnProxyPort.MaxLength = 10;
-            this.btnProxyPort.Name = "btnProxyPort";
-            this.btnProxyPort.Size = new System.Drawing.Size(341, 21);
-            this.btnProxyPort.TabIndex = 4;
-            this.btnProxyPort.WordWrap = false;
+            this.btnLocalProxyPort.Location = new System.Drawing.Point(81, 19);
+            this.btnLocalProxyPort.MaxLength = 10;
+            this.btnLocalProxyPort.Name = "btnLocalProxyPort";
+            this.btnLocalProxyPort.Size = new System.Drawing.Size(341, 21);
+            this.btnLocalProxyPort.TabIndex = 4;
+            this.btnLocalProxyPort.WordWrap = false;
+            this.btnLocalProxyPort.TextChanged += new System.EventHandler(this.ViewTextBox_TextChanged);
             // 
             // ProxyPortLabel
             // 
@@ -265,7 +272,7 @@
             // 
             // gbxGeneral
             // 
-            this.gbxGeneral.Controls.Add(this.btnProxyPort);
+            this.gbxGeneral.Controls.Add(this.btnLocalProxyPort);
             this.gbxGeneral.Controls.Add(this.ProxyPortLabel);
             this.gbxGeneral.Location = new System.Drawing.Point(10, 171);
             this.gbxGeneral.Name = "gbxGeneral";
@@ -274,6 +281,15 @@
             this.gbxGeneral.TabStop = false;
             this.gbxGeneral.Text = "General";
             // 
+            // lblStatus
+            // 
+            this.lblStatus.ForeColor = System.Drawing.Color.Red;
+            this.lblStatus.Location = new System.Drawing.Point(169, 229);
+            this.lblStatus.Name = "lblStatus";
+            this.lblStatus.Size = new System.Drawing.Size(270, 21);
+            this.lblStatus.TabIndex = 5;
+            this.lblStatus.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            // 
             // ConfigForm
             // 
             this.AcceptButton = this.btnOK;
@@ -281,6 +297,7 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
             this.CancelButton = this.btnCancel;
             this.ClientSize = new System.Drawing.Size(451, 258);
+            this.Controls.Add(this.lblStatus);
             this.Controls.Add(this.btnCancel);
             this.Controls.Add(this.gbxGeneral);
             this.Controls.Add(this.gbxServerConfigs);
@@ -291,6 +308,7 @@
             this.Name = "ConfigForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Edit Servers";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.ConfigForm_FormClosing);
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.ConfigForm_FormClosed);
             this.Load += new System.EventHandler(this.ConfigForm_Load);
             this.Shown += new System.EventHandler(this.ConfigForm_Shown);
@@ -315,7 +333,7 @@
         private System.Windows.Forms.TextBox tbxServerPort;
         private System.Windows.Forms.TextBox tbxPassword;
         private System.Windows.Forms.TextBox btnRemarks;
-        private System.Windows.Forms.TextBox btnProxyPort;
+        private System.Windows.Forms.TextBox btnLocalProxyPort;
         private System.Windows.Forms.ComboBox cbxEncryptions;
         private System.Windows.Forms.Button btnOK;
         private System.Windows.Forms.Button btnCancel;
@@ -324,6 +342,7 @@
         private System.Windows.Forms.GroupBox gbxServerConfigs;
         private System.Windows.Forms.GroupBox gbxGeneral;
         private System.Windows.Forms.ListBox lbxServersList;
+        private System.Windows.Forms.Label lblStatus;
     }
 }
 

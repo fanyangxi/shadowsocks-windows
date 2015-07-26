@@ -16,9 +16,10 @@ namespace Shadowsocks.View
     {
         // this is a copy of configuration that we are working on
         private Configuration _currentConfiguration;
-        private SsServerInfo _selectedSsServerInfo;
+        private SsServerInfo _lastSelectedSsServerInfo;
         private ShadowsocksController _ssController;
         private int _oldSelectedItemIndex = -1;
+        private string _originalSerializedConfigData = string.Empty;
 
         public ConfigForm(ShadowsocksController controller)
         {
@@ -26,7 +27,7 @@ namespace Shadowsocks.View
 
             this.Font = System.Drawing.SystemFonts.MessageBoxFont;
             this.Icon = Icon.FromHandle(Resources.ssw128.GetHicon());
-
+            this._lastSelectedSsServerInfo = null;
             this._ssController = controller;
             controller.ConfigChanged += ssController_ConfigChanged;
 
@@ -36,12 +37,29 @@ namespace Shadowsocks.View
 
         private void ConfigForm_Load(object sender, EventArgs e)
         {
+            CacheOriginalConfigData();
             RenderConfigurationInfo(_currentConfiguration);
         }
 
         private void ConfigForm_Shown(object sender, EventArgs e)
         {
             tbxServerIP.Focus();
+        }
+
+        private void ConfigForm_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            if (this.IsCurrentConfigDataChanged())
+            {
+                var dialogResult = MessageBox.Show("Do you want to save the changed data?", "Warning", MessageBoxButtons.OKCancel);
+                if (dialogResult == System.Windows.Forms.DialogResult.OK)
+                {
+                    _ssController.SaveServers(_currentConfiguration.ServerInfos, _currentConfiguration.localPort);
+                }
+                else
+                {
+                    e.Cancel = true;
+                }
+            }
         }
 
         private void ConfigForm_FormClosed(object sender, FormClosedEventArgs e)
@@ -52,16 +70,15 @@ namespace Shadowsocks.View
         private void lbxServersList_SelectedIndexChanged(object sender, EventArgs e)
         {
             var itemDisplayName = Convert.ToString(lbxServersList.SelectedItem);
-            _selectedSsServerInfo = _currentConfiguration.ServerInfos.Find(o => o.DisplayName() == itemDisplayName);
+            var lastItemDisplayName = _lastSelectedSsServerInfo == null ? string.Empty : _lastSelectedSsServerInfo.DisplayName();
 
-            if (!CheckCurrentSelectedSsServerInfo())
+            var newSelectedIndex = lbxServersList.SelectedIndex;
+            var lastSelectedIndex = _currentConfiguration.ServerInfos.FindIndex(o => o.DisplayName() == lastItemDisplayName);
+            if (newSelectedIndex != lastSelectedIndex)
             {
-                // why this won't cause stack overflow?
-                lbxServersList.SelectedIndex = _oldSelectedItemIndex;
-                return;
+                _lastSelectedSsServerInfo = _currentConfiguration.ServerInfos.Find(o => o.DisplayName() == itemDisplayName);
+                RenderSelectedSsServerInfo();
             }
-
-            RenderSelectedSsServerInfo();
 
             // Record the last selected item index
             _oldSelectedItemIndex = lbxServersList.SelectedIndex;
@@ -69,10 +86,10 @@ namespace Shadowsocks.View
 
         private void btnAddItem_Click(object sender, EventArgs e)
         {
-            if (!CheckCurrentSelectedSsServerInfo())
-            {
-                return;
-            }
+            //if (!CheckCurrentConfigObject())
+            //{
+            //    return;
+            //}
 
             _currentConfiguration.ServerInfos.Add(Configuration.GetDefaultSsServerInfo());
 
@@ -80,44 +97,40 @@ namespace Shadowsocks.View
 
             // Select the last new added item
             lbxServersList.SelectedIndex = _currentConfiguration.ServerInfos.Count - 1;
+
+            this.btnOK.Enabled = this.IsCurrentConfigDataChanged();
         }
 
         private void btnDeleteItem_Click(object sender, EventArgs e)
         {
-            if (_selectedSsServerInfo != null)
+            if (_lastSelectedSsServerInfo != null)
             {
-                _currentConfiguration.ServerInfos.Remove(_selectedSsServerInfo);
+                _currentConfiguration.ServerInfos.Remove(_lastSelectedSsServerInfo);
             }
 
             // Make sure there are at least 1 ss-server-info
             if (_currentConfiguration.ServerInfos.Count == 0)
             {
                 _currentConfiguration.ServerInfos.Add(Configuration.GetDefaultSsServerInfo());
+                btnDeleteItem.Enabled = false;
             }
 
             RenderConfigurationInfo(_currentConfiguration);
+
+            this.btnOK.Enabled = this.IsCurrentConfigDataChanged();
         }
 
         private void btnOK_Click(object sender, EventArgs e)
         {
-            if (!CheckCurrentSelectedSsServerInfo())
-            {
-                return;
-            }
-
-            if (!CheckCurrentGeneralConfigInfo())
-            {
-                return;
-            }
-
-            if (_currentConfiguration.ServerInfos.Count == 0)
-            {
-                MessageBox.Show(I18N.GetString("Please add at least one server"));
-                return;
-            }
+            //if (!CheckCurrentConfigObject())
+            //{
+            //    return;
+            //}
 
             _ssController.SaveServers(_currentConfiguration.ServerInfos, _currentConfiguration.localPort);
-            this.Close();
+            CacheOriginalConfigData();
+
+            this.btnOK.Enabled = this.IsCurrentConfigDataChanged();
         }
 
         private void btnCancel_Click(object sender, EventArgs e)
@@ -153,45 +166,52 @@ namespace Shadowsocks.View
             tbxServerIP.Focus();
         }
 
-        private bool CheckCurrentSelectedSsServerInfo()
+        private bool UpdateCurrentConfigObject(string theControlName)
         {
-            try
+            if (_lastSelectedSsServerInfo == null)
             {
-                if (_selectedSsServerInfo == null)
+                return true;
+            }
+
+            ShowStatusMessage(string.Empty);
+
+            // ServerIP
+            if (theControlName.Contains("IP"))
+            {
+                _lastSelectedSsServerInfo.server = tbxServerIP.Text;
+                this.TryAction((obj) => { Utils.IsServerIPNotEmpty(tbxServerIP.Text); });
+            }
+
+            if (theControlName.Contains("Password"))
+            {
+                _lastSelectedSsServerInfo.password = tbxPassword.Text;
+                this.TryAction((obj) => { Utils.IsPasswordNotEmpty(tbxPassword.Text); });
+            }
+
+            if (theControlName.Contains("Encryption"))
+            {
+                _lastSelectedSsServerInfo.method = cbxEncryptions.Text;
+                this.TryAction((obj) => { Utils.IsEncryptionNotEmpty(cbxEncryptions.Text); });
+            }
+
+            if (theControlName.Contains("ServerPort"))
+            {
+                this.TryAction((obj) =>
                 {
-                    return true;
-                }
-
-                _selectedSsServerInfo.server = tbxServerIP.Text;
-                _selectedSsServerInfo.server_port = int.Parse(tbxServerPort.Text);
-                _selectedSsServerInfo.password = tbxPassword.Text;
-                _selectedSsServerInfo.method = cbxEncryptions.Text;
-                _selectedSsServerInfo.remarks = btnRemarks.Text;
-                Utils.IsSsServerInfoValid(_selectedSsServerInfo);
-
-                return true;
-            }
-            catch (Exception)
-            {
-                MessageBox.Show(I18N.GetString("Illegal port number format"));
+                    var theServerPort = int.Parse(tbxServerPort.Text);
+                    Utils.IsPortValid(theServerPort);
+                    _lastSelectedSsServerInfo.server_port = theServerPort;
+                });
             }
 
-            return false;
-        }
-
-        private bool CheckCurrentGeneralConfigInfo()
-        {
-            try
+            if (theControlName.Contains("LocalProxyPort"))
             {
-                var localPort = int.Parse(btnProxyPort.Text);
-                Utils.IsPortValid(localPort);
-                _currentConfiguration.localPort = localPort;
-
-                return true;
-            }
-            catch (Exception)
-            {
-                MessageBox.Show(I18N.GetString("Illegal port number format"));
+                this.TryAction((obj) =>
+                {
+                    var localPort = int.Parse(btnLocalProxyPort.Text);
+                    Utils.IsPortValid(localPort);
+                    _currentConfiguration.localPort = localPort;
+                });
             }
 
             return false;
@@ -225,26 +245,70 @@ namespace Shadowsocks.View
 
             // Re-set back to the old selected-index
             lbxServersList.SelectedIndex = oldSelectedIndex;
-
-            RenderSelectedSsServerInfo();
         }
 
         private void RenderSelectedSsServerInfo()
         {
-            if (lbxServersList.SelectedIndex < 0 ||
-                lbxServersList.SelectedIndex >= _currentConfiguration.ServerInfos.Count)
+            if (_lastSelectedSsServerInfo == null)
             {
                 return;
             }
 
-            var server = _currentConfiguration.ServerInfos[lbxServersList.SelectedIndex];
-            tbxServerIP.Text = server.server;
-            tbxServerPort.Text = server.server_port.ToString();
-            tbxPassword.Text = server.password;
-            btnProxyPort.Text = _currentConfiguration.localPort.ToString();
-            cbxEncryptions.Text = server.method ?? "aes-256-cfb";
-            btnRemarks.Text = server.remarks;
+            tbxServerIP.Text = _lastSelectedSsServerInfo.server;
+            tbxServerPort.Text = _lastSelectedSsServerInfo.server_port.ToString();
+            tbxPassword.Text = _lastSelectedSsServerInfo.password;
+            btnLocalProxyPort.Text = _currentConfiguration.localPort.ToString();
+            cbxEncryptions.SelectedItem = _lastSelectedSsServerInfo.method ?? "aes-256-cfb";
+            btnRemarks.Text = _lastSelectedSsServerInfo.remarks;
             gbxServerConfigs.Visible = true;
+        }
+
+        private bool IsCurrentConfigDataChanged()
+        {
+            var serializedConfigData = SimpleJson.SimpleJson.SerializeObject(_currentConfiguration);
+            return string.Compare(_originalSerializedConfigData, serializedConfigData, true) != 0;
+        }
+
+        private void ViewTextBox_TextChanged(object sender, EventArgs e)
+        {
+            var theTextBox = sender as TextBox;
+            UpdateCurrentConfigObject(theTextBox.Name);
+            RenderConfigurationInfo(_currentConfiguration);
+
+            this.btnOK.Enabled = this.IsCurrentConfigDataChanged();
+        }
+
+        private void cbxEncryptions_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            //btnLocalProxyPort
+            var theCombo = sender as ComboBox;
+            UpdateCurrentConfigObject(theCombo.Name);
+            RenderConfigurationInfo(_currentConfiguration);
+        }
+
+        private void CacheOriginalConfigData()
+        {
+            // Cache original data, to check if the data has been changed
+            _originalSerializedConfigData = SimpleJson.SimpleJson.SerializeObject(_currentConfiguration);
+        }
+
+        private void ShowStatusMessage(string message)
+        {
+            lblStatus.Text = message;
+        }
+
+        private bool TryAction(Action<object> action)
+        {
+            try
+            {
+                action(null);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                ShowStatusMessage(ex.Message);
+                return false;
+            }
         }
     }
 }
