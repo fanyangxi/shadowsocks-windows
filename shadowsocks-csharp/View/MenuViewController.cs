@@ -97,10 +97,10 @@ namespace Shadowsocks.View
 
         private void UpdateTrayIcon()
         {
-            int dpi;
-            Graphics graphics = Graphics.FromHwnd(IntPtr.Zero);
-            dpi = (int)graphics.DpiX;
+            var graphics = Graphics.FromHwnd(IntPtr.Zero);
+            var dpi = (int)graphics.DpiX;
             graphics.Dispose();
+
             Bitmap icon = null;
             if (dpi < 97)
             {

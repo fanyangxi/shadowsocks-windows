@@ -72,6 +72,13 @@ namespace Shadowsocks.Controller
                     i--;
                     Logging.LogUsefulException(ex);
                 }
+                finally
+                {
+                    if (remoteSocket != null)
+                    {
+                        remoteSocket.Close();
+                    }
+                }
             }
         }
 
