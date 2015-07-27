@@ -87,6 +87,11 @@ namespace Shadowsocks.Model
             return this.server == o2.server && this.server_port == o2.server_port;
         }
 
+        public string ShortName()
+        {
+            return server + ":" + server_port;
+        }
+
         public string DisplayName()
         {
             if (string.IsNullOrEmpty(server))

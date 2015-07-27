@@ -543,7 +543,6 @@ namespace Shadowsocks.Controller
                     }
                     remote.BeginSend(connetionSendBuffer, 0, bytesToSend, 0, new AsyncCallback(PipeRemoteSendCallback), null);
 
-
                     IStrategy strategy = controller.GetCurrentStrategy();
                     if (strategy != null)
                     {
