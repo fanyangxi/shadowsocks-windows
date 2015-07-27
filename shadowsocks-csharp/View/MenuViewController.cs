@@ -117,10 +117,10 @@ namespace Shadowsocks.View
                 icon = Resources.ss24;
             }
 
-            Configuration config = controller.GetConfigurationCopy();
-            bool enabled = config.enabled;
-            bool global = config.global;
-            if (!enabled)
+            var config = controller.GetConfigurationCopy();
+            bool isGlobalNotPAC = config.global;
+            bool isSsEnabled = config.enabled;
+            if (!isSsEnabled)
             {
                 Bitmap iconCopy = new Bitmap(icon);
                 for (int x = 0; x < iconCopy.Width; x++)
@@ -135,7 +135,7 @@ namespace Shadowsocks.View
             }
             _notifyIcon.Icon = Icon.FromHandle(icon.GetHicon());
 
-            string serverInfo = null;
+            var serverInfo = string.Empty;
             if (controller.GetCurrentStrategy() != null)
             {
                 serverInfo = controller.GetCurrentStrategy().Name;
@@ -144,12 +144,18 @@ namespace Shadowsocks.View
             {
                 serverInfo = config.GetCurrentSsServerInfo().DisplayName();
             }
+
+            var validSsServerInfoCount = string.Format(" ({0})", config.ServerInfos.Count);
+
+            // this feedback is very important because user needs to know Shadowsocks is running
+            var tProxyStatusDesc = isSsEnabled ?
+                I18N.GetString("System Proxy On: ") + (isGlobalNotPAC ? I18N.GetString("Global") : I18N.GetString("PAC")) :
+                String.Format(I18N.GetString("Running: Port {0}"), config.localPort);
+
             // we want to show more details but notify icon title is limited to 63 characters
-            string text = I18N.GetString("Shadowsocks") + " " + UpdateChecker.Version + "\n" +
-                (enabled ?
-                    I18N.GetString("System Proxy On: ") + (global ? I18N.GetString("Global") : I18N.GetString("PAC")) :
-                    String.Format(I18N.GetString("Running: Port {0}"), config.localPort))  // this feedback is very important because they need to know Shadowsocks is running
-                + "\n" + serverInfo;
+            var text = I18N.GetString("Shadowsocks") + " " + UpdateChecker.Version + "\n" +
+                tProxyStatusDesc + "\n" +
+                serverInfo + validSsServerInfoCount;
             _notifyIcon.Text = text.Substring(0, Math.Min(63, text.Length));
         }
 
@@ -379,7 +385,7 @@ namespace Shadowsocks.View
             ssLinkScrapper.ParseRawHtml((obj) => { });
             freeSsServers.AddRange(ssLinkScrapper.TheServerInfos);
 
-            ShowBalloonTip("Congrats:", string.Format("Re-load {0} free ss-servers from iShadowsocks.COM completed",
+            ShowBalloonTip("Congrats:", string.Format("Re-load {0} free ss-servers from iShadowsocks/SS-Link completed",
                 freeSsServers.Count), ToolTipIcon.Info, 3000);
 
             var aaa = new BackendConfigUpdateController(controller);
