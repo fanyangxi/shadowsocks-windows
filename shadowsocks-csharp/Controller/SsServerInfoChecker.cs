@@ -24,7 +24,7 @@ namespace Shadowsocks.Controller
 
         public void ReStartCheckTimer()
         {
-            timer = new System.Threading.Timer(new System.Threading.TimerCallback(connectTimer_Elapsed), null, 0, 30 * 1000);
+            timer = new System.Threading.Timer(new System.Threading.TimerCallback(connectTimer_Elapsed), null, 0, 60 * 1000);
         }
 
         private void connectTimer_Elapsed(object sender)
