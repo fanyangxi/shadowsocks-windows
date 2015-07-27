@@ -28,7 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.btnRemarks = new System.Windows.Forms.TextBox();
+            this.tbxRemarks = new System.Windows.Forms.TextBox();
             this.RemarksLabel = new System.Windows.Forms.Label();
             this.IPLabel = new System.Windows.Forms.Label();
             this.ServerPortLabel = new System.Windows.Forms.Label();
@@ -53,15 +53,15 @@
             this.gbxGeneral.SuspendLayout();
             this.SuspendLayout();
             // 
-            // btnRemarks
+            // tbxRemarks
             // 
-            this.btnRemarks.Location = new System.Drawing.Point(263, 127);
-            this.btnRemarks.MaxLength = 32;
-            this.btnRemarks.Name = "btnRemarks";
-            this.btnRemarks.Size = new System.Drawing.Size(160, 21);
-            this.btnRemarks.TabIndex = 10;
-            this.btnRemarks.WordWrap = false;
-            this.btnRemarks.TextChanged += new System.EventHandler(this.ViewTextBox_TextChanged);
+            this.tbxRemarks.Location = new System.Drawing.Point(263, 127);
+            this.tbxRemarks.MaxLength = 32;
+            this.tbxRemarks.Name = "tbxRemarks";
+            this.tbxRemarks.Size = new System.Drawing.Size(160, 21);
+            this.tbxRemarks.TabIndex = 10;
+            this.tbxRemarks.WordWrap = false;
+            this.tbxRemarks.TextChanged += new System.EventHandler(this.ViewTextBox_TextChanged);
             // 
             // RemarksLabel
             // 
@@ -218,7 +218,7 @@
             // 
             // gbxServerConfigs
             // 
-            this.gbxServerConfigs.Controls.Add(this.btnRemarks);
+            this.gbxServerConfigs.Controls.Add(this.tbxRemarks);
             this.gbxServerConfigs.Controls.Add(this.btnDeleteItem);
             this.gbxServerConfigs.Controls.Add(this.RemarksLabel);
             this.gbxServerConfigs.Controls.Add(this.lbxServersList);
@@ -332,7 +332,7 @@
         private System.Windows.Forms.TextBox tbxServerIP;
         private System.Windows.Forms.TextBox tbxServerPort;
         private System.Windows.Forms.TextBox tbxPassword;
-        private System.Windows.Forms.TextBox btnRemarks;
+        private System.Windows.Forms.TextBox tbxRemarks;
         private System.Windows.Forms.TextBox btnLocalProxyPort;
         private System.Windows.Forms.ComboBox cbxEncryptions;
         private System.Windows.Forms.Button btnOK;

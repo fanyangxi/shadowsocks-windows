@@ -7,6 +7,7 @@ using System.IO;
 using System.IO.Compression;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace Shadowsocks
 {
@@ -99,6 +100,32 @@ namespace Shadowsocks
             {
                 throw new ArgumentException(I18N.GetString("Encryption method can not be blank"));
             }
+        }
+
+        public static string SingleMatchGroupWithRegex(string regexWithSingleMatchGroup, string rawText)
+        {
+            var match = new Regex(regexWithSingleMatchGroup, RegexOptions.Singleline).Match(rawText).Groups;
+            var result = match[1].ToString();
+            return result;
+        }
+
+        public static KeyValuePair<string, string> SingleMatchTwoGroupsWithRegex(string regexWithSingleMatchGroup, string rawText)
+        {
+            var match = new Regex(regexWithSingleMatchGroup, RegexOptions.Singleline).Match(rawText).Groups;
+            var result = new KeyValuePair<string, string>(match[1].ToString(), match[2].ToString());
+            return result;
+        }
+
+        public static List<string> MultiMatchSingleGroupWithRegex(string regexWithSingleMatchGroup, string rawText)
+        {
+            var results = new List<string>();
+            var matches = new Regex(regexWithSingleMatchGroup, RegexOptions.Singleline).Matches(rawText);
+            foreach (Match match in matches)
+            {
+                results.Add(match.Groups[1].ToString());
+            }
+
+            return results;
         }
     }
 }

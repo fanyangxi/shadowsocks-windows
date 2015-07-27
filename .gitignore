@@ -5,3 +5,4 @@ shadowsocks-csharp/shadowsocks-csharp.csproj.user
 TestResults
 *.suo
 
+/test/*.user

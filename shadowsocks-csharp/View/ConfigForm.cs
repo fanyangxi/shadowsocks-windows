@@ -103,6 +103,10 @@ namespace Shadowsocks.View
 
         private void btnDeleteItem_Click(object sender, EventArgs e)
         {
+            //var aaa = new SsServerInfoChecker();
+            //aaa.Check(_lastSelectedSsServerInfo);
+
+            return;
             if (_lastSelectedSsServerInfo != null)
             {
                 _currentConfiguration.ServerInfos.Remove(_lastSelectedSsServerInfo);
@@ -211,6 +215,11 @@ namespace Shadowsocks.View
                 });
             }
 
+            if (theControlName.Contains("Remarks"))
+            {
+                _lastSelectedSsServerInfo.remarks = tbxRemarks.Text;
+            }
+
             if (theControlName.Contains("LocalProxyPort"))
             {
                 this.TryAction((obj) =>
@@ -266,7 +275,7 @@ namespace Shadowsocks.View
             tbxPassword.Text = _lastSelectedSsServerInfo.password;
             btnLocalProxyPort.Text = _currentConfiguration.localPort.ToString();
             cbxEncryptions.SelectedItem = _lastSelectedSsServerInfo.method ?? "aes-256-cfb";
-            btnRemarks.Text = _lastSelectedSsServerInfo.remarks;
+            tbxRemarks.Text = _lastSelectedSsServerInfo.remarks;
             gbxServerConfigs.Visible = true;
         }
 

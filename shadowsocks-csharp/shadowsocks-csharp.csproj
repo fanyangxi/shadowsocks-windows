@@ -67,6 +67,7 @@
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
+    <Reference Include="System.Web" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.XML" />
   </ItemGroup>
@@ -124,7 +125,10 @@
     <Compile Include="3rd\zxing\ResultPoint.cs" />
     <Compile Include="3rd\zxing\ResultPointCallback.cs" />
     <Compile Include="3rd\zxing\WriterException.cs" />
+    <Compile Include="Controller\free+iShadowsocks\FreeiShadowsocksScrapper.cs" />
+    <Compile Include="Controller\free+SS-Link\FreeSsLinkScrapper.cs" />
     <Compile Include="Controller\PathEventArgs.cs" />
+    <Compile Include="Controller\SsServerInfoChecker.cs" />
     <Compile Include="Controller\Strategy\HighAvailabilityStrategy.cs" />
     <Compile Include="Controller\System\AutoStartup.cs" />
     <Compile Include="Controller\FileManager.cs" />
@@ -155,7 +159,9 @@
     <Compile Include="Controller\Strategy\BalancingStrategy.cs" />
     <Compile Include="Controller\Strategy\StrategyManager.cs" />
     <Compile Include="Controller\Strategy\IStrategy.cs" />
+    <Compile Include="Util\HttpRequestHelper.cs" />
     <Compile Include="Util\Utils.cs" />
+    <Compile Include="Controller\BackendConfigUpdateController.cs" />
     <Compile Include="View\ConfigForm.cs">
       <SubType>Form</SubType>
     </Compile>

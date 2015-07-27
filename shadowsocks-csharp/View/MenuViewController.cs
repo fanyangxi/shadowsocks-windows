@@ -19,13 +19,17 @@ namespace Shadowsocks.View
         // when config form is closed, it moves away from RAM
         // and it should just do anything related to the config form
 
+        private static NotifyIcon _notifyIcon;
+
         private ShadowsocksController controller;
         private UpdateChecker updateChecker;
 
-        private NotifyIcon _notifyIcon;
         private ContextMenu contextMenu1;
 
+        private ConfigForm configForm;
+        private string _urlToOpen;
         private bool _isFirstRun;
+
         private MenuItem enableItem;
         private MenuItem modeItem;
         private MenuItem AutoStartupItem;
@@ -41,8 +45,7 @@ namespace Shadowsocks.View
         private MenuItem updateFromGFWListItem;
         private MenuItem editGFWUserRuleItem;
         private MenuItem editOnlinePACItem;
-        private ConfigForm configForm;
-        private string _urlToOpen;
+        private MenuItem reloadFreeSsServersItem;
 
         public MenuViewController(ShadowsocksController controller)
         {
@@ -66,12 +69,11 @@ namespace Shadowsocks.View
             _notifyIcon.ContextMenu = contextMenu1;
             _notifyIcon.MouseDoubleClick += notifyIcon1_DoubleClick;
 
-            this.updateChecker = new UpdateChecker();
-            updateChecker.NewVersionFound += updateChecker_NewVersionFound;
-
             LoadCurrentConfiguration();
 
-            updateChecker.CheckUpdate(controller.GetConfigurationCopy());
+            this.updateChecker = new UpdateChecker();
+            updateChecker.NewVersionFound += updateChecker_NewVersionFound;
+            //updateChecker.CheckUpdate(controller.GetConfigurationCopy());
 
             if (controller.GetConfigurationCopy().isDefault)
             {
@@ -80,7 +82,15 @@ namespace Shadowsocks.View
             }
         }
 
-        void controller_Errored(object sender, System.IO.ErrorEventArgs e)
+        public static void ShowBalloonTip(string title, string content, ToolTipIcon icon, int timeout)
+        {
+            _notifyIcon.BalloonTipTitle = title;
+            _notifyIcon.BalloonTipText = content;
+            _notifyIcon.BalloonTipIcon = icon;
+            _notifyIcon.ShowBalloonTip(timeout);
+        }
+
+        private void controller_Errored(object sender, System.IO.ErrorEventArgs e)
         {
             MessageBox.Show(e.GetException().ToString(), String.Format(I18N.GetString("Shadowsocks Error: {0}"), e.GetException().Message));
         }
@@ -132,7 +142,7 @@ namespace Shadowsocks.View
             }
             else
             {
-                serverInfo = config.GetCurrentServer().DisplayName();
+                serverInfo = config.GetCurrentSsServerInfo().DisplayName();
             }
             // we want to show more details but notify icon title is limited to 63 characters
             string text = I18N.GetString("Shadowsocks") + " " + UpdateChecker.Version + "\n" +
@@ -188,7 +198,7 @@ namespace Shadowsocks.View
                 //    CreateMenuItem("From SS-Link", new EventHandler(this.UpdateFreeServersFromSSLink_Click)),
                 //    new MenuItem("-"),
                 //}),
-                CreateMenuItem("Update Free Servers", new EventHandler(this.UpdateFreeServers_Click)),
+               this.reloadFreeSsServersItem = CreateMenuItem("Reload-Free-Servers", new EventHandler(this.ReloadFreeSsServers_Click)),
                 new MenuItem("-"),
                 CreateMenuItem("Quit", new EventHandler(this.Quit_Click))
             });
@@ -206,52 +216,44 @@ namespace Shadowsocks.View
             modeItem.Enabled = enableItem.Checked;
         }
 
-        void controller_ShareOverLANStatusChanged(object sender, EventArgs e)
+        private void controller_ShareOverLANStatusChanged(object sender, EventArgs e)
         {
             ShareOverLANItem.Checked = controller.GetConfigurationCopy().shareOverLan;
         }
 
-        void controller_EnableGlobalChanged(object sender, EventArgs e)
+        private void controller_EnableGlobalChanged(object sender, EventArgs e)
         {
             globalModeItem.Checked = controller.GetConfigurationCopy().global;
             PACModeItem.Checked = !globalModeItem.Checked;
         }
 
-        void controller_FileReadyToOpen(object sender, PathEventArgs e)
+        private void controller_FileReadyToOpen(object sender, PathEventArgs e)
         {
             string argument = @"/select, " + e.Path;
 
             System.Diagnostics.Process.Start("explorer.exe", argument);
         }
 
-        void ShowBalloonTip(string title, string content, ToolTipIcon icon, int timeout)
-        {
-            _notifyIcon.BalloonTipTitle = title;
-            _notifyIcon.BalloonTipText = content;
-            _notifyIcon.BalloonTipIcon = icon;
-            _notifyIcon.ShowBalloonTip(timeout);
-        }
-
-        void controller_UpdatePACFromGFWListError(object sender, System.IO.ErrorEventArgs e)
+        private void controller_UpdatePACFromGFWListError(object sender, System.IO.ErrorEventArgs e)
         {
             ShowBalloonTip(I18N.GetString("Failed to update PAC file"), e.GetException().Message, ToolTipIcon.Error, 5000);
             Logging.LogUsefulException(e.GetException());
         }
 
-        void controller_UpdatePACFromGFWListCompleted(object sender, GFWListUpdater.ResultEventArgs e)
+        private void controller_UpdatePACFromGFWListCompleted(object sender, GFWListUpdater.ResultEventArgs e)
         {
             string result = e.Success ? I18N.GetString("PAC updated") : I18N.GetString("No updates found. Please report to GFWList if you have problems with it.");
             ShowBalloonTip(I18N.GetString("Shadowsocks"), result, ToolTipIcon.Info, 1000);
         }
 
-        void updateChecker_NewVersionFound(object sender, EventArgs e)
+        private void updateChecker_NewVersionFound(object sender, EventArgs e)
         {
             ShowBalloonTip(String.Format(I18N.GetString("Shadowsocks {0} Update Found"), updateChecker.LatestVersionNumber), I18N.GetString("Click here to download"), ToolTipIcon.Info, 5000);
             _notifyIcon.BalloonTipClicked += notifyIcon1_BalloonTipClicked;
             _isFirstRun = false;
         }
 
-        void notifyIcon1_BalloonTipClicked(object sender, EventArgs e)
+        private void notifyIcon1_BalloonTipClicked(object sender, EventArgs e)
         {
             System.Diagnostics.Process.Start(updateChecker.LatestVersionURL);
             _notifyIcon.BalloonTipClicked -= notifyIcon1_BalloonTipClicked;
@@ -261,6 +263,7 @@ namespace Shadowsocks.View
         {
             Configuration config = controller.GetConfigurationCopy();
             UpdateServersMenu();
+
             enableItem.Checked = config.enabled;
             modeItem.Enabled = config.enabled;
             globalModeItem.Checked = config.global;
@@ -279,10 +282,11 @@ namespace Shadowsocks.View
             {
                 items.RemoveAt(0);
             }
+
             int i = 0;
             foreach (var strategy in controller.GetStrategies())
             {
-                MenuItem item = new MenuItem(strategy.Name);
+                var item = new MenuItem(strategy.Name);
                 item.Tag = strategy.ID;
                 item.Click += AStrategyItem_Click;
                 items.Add(i, item);
@@ -290,10 +294,10 @@ namespace Shadowsocks.View
             }
 
             int strategyCount = i;
-            Configuration configuration = controller.GetConfigurationCopy();
+            var configuration = controller.GetConfigurationCopy();
             foreach (var server in configuration.ServerInfos)
             {
-                MenuItem item = new MenuItem(server.DisplayName());
+                var item = new MenuItem(server.DisplayName());
                 item.Tag = i - strategyCount;
                 item.Click += AServerItem_Click;
                 items.Add(i, item);
@@ -306,7 +310,6 @@ namespace Shadowsocks.View
                 {
                     item.Checked = true;
                 }
-
             }
         }
 
@@ -324,7 +327,7 @@ namespace Shadowsocks.View
             }
         }
 
-        void configForm_FormClosed(object sender, FormClosedEventArgs e)
+        private void configForm_FormClosed(object sender, FormClosedEventArgs e)
         {
             configForm = null;
             Utils.ReleaseMemory();
@@ -347,10 +350,9 @@ namespace Shadowsocks.View
         {
             if (_isFirstRun)
             {
-                _notifyIcon.BalloonTipTitle = I18N.GetString("Shadowsocks is here");
-                _notifyIcon.BalloonTipText = I18N.GetString("You can turn on/off Shadowsocks in the context menu");
-                _notifyIcon.BalloonTipIcon = ToolTipIcon.Info;
-                _notifyIcon.ShowBalloonTip(0);
+                var title = I18N.GetString("Shadowsocks is here");
+                var text = I18N.GetString("You can turn on/off Shadowsocks in the context menu");
+                ShowBalloonTip(title, text, ToolTipIcon.Info, 3000);
                 _isFirstRun = false;
             }
         }
@@ -360,9 +362,28 @@ namespace Shadowsocks.View
             Process.Start("https://github.com/shadowsocks/shadowsocks-csharp");
         }
 
-        private void UpdateFreeServers_Click(object sender, EventArgs e)
+        private void ReloadFreeSsServers_Click(object sender, EventArgs e)
         {
-            //throw new NotImplementedException();
+            //var freeSsServers = new List<SsServerInfo>();
+            //freeSsServers.Add(new SsServerInfo() { server = "US-1.SSSERVER.PW", server_port = 8989, password = "45626051", method = "AES-256-CFB", remarks = "iS-A" });
+            //freeSsServers.Add(new SsServerInfo() { server = "US2.SSSERVER.PW", server_port = 8989, password = "09268760", method = "AES-256-CFB", remarks = "iS-B" });
+            var freeSsServers = new List<SsServerInfo>();
+
+            var iShadowScrapper = new FreeiShadowsocksScrapper();
+            iShadowScrapper.ScrapRawHtml();
+            iShadowScrapper.ParseRawHtml((obj) => { });
+            freeSsServers.AddRange(iShadowScrapper.TheServerInfos);
+
+            var ssLinkScrapper = new FreeSsLinkScrapper();
+            ssLinkScrapper.ScrapRawHtml();
+            ssLinkScrapper.ParseRawHtml((obj) => { });
+            freeSsServers.AddRange(ssLinkScrapper.TheServerInfos);
+
+            ShowBalloonTip("Congrats:", string.Format("Re-load {0} free ss-servers from iShadowsocks.COM completed",
+                freeSsServers.Count), ToolTipIcon.Info, 3000);
+
+            var aaa = new BackendConfigUpdateController(controller);
+            aaa.SaveLoadFreeSsServerInfos(freeSsServers, 1080);
         }
 
         private void UpdateFreeServersFromiShadowsocks_Click(object sender, EventArgs e)
@@ -421,7 +442,7 @@ namespace Shadowsocks.View
 
         private void AServerItem_Click(object sender, EventArgs e)
         {
-            MenuItem item = (MenuItem)sender;
+            var item = (MenuItem)sender;
             controller.SelectServerIndex((int)item.Tag);
         }
 
@@ -530,12 +551,12 @@ namespace Shadowsocks.View
             MessageBox.Show(I18N.GetString("No QRCode found. Try to zoom in or move it to the center of the screen."));
         }
 
-        void splash_FormClosed(object sender, FormClosedEventArgs e)
+        private void splash_FormClosed(object sender, FormClosedEventArgs e)
         {
             ShowConfigForm();
         }
 
-        void openURLFromQRCode(object sender, FormClosedEventArgs e)
+        private void openURLFromQRCode(object sender, FormClosedEventArgs e)
         {
             Process.Start(_urlToOpen);
         }

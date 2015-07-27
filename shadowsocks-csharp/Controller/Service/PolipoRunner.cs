@@ -40,7 +40,7 @@ namespace Shadowsocks.Controller
 
         public void Start(Configuration configuration)
         {
-            SsServerInfo server = configuration.GetCurrentServer();
+            SsServerInfo server = configuration.GetCurrentSsServerInfo();
             if (_process == null)
             {
                 Process[] existingPolipo = Process.GetProcessesByName("ss_polipo");

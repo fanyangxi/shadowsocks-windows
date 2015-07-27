@@ -85,7 +85,6 @@ namespace Shadowsocks.Controller
             }
         }
 
-
         public string TouchPACFile()
         {
             if (File.Exists(PAC_FILE))

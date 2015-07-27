@@ -40,8 +40,10 @@ namespace Shadowsocks
                 Logging.OpenLogFile();
 #endif
                 var controller = new ShadowsocksController();
-                var viewController = new MenuViewController(controller);
+                var mViewController = new MenuViewController(controller);
+                var serverInfosChecker = new SsServerInfoChecker(controller);
                 controller.Start();
+                serverInfosChecker.ReStartCheckTimer();
 
                 Application.Run();
             }

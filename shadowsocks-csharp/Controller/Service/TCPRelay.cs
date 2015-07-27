@@ -10,7 +10,6 @@ using System.Timers;
 
 namespace Shadowsocks.Controller
 {
-
     class TCPRelay : Listener.Service
     {
         private ShadowsocksController _controller;
@@ -74,7 +73,7 @@ namespace Shadowsocks.Controller
         private bool connectionShutdown = false;
         private bool remoteShutdown = false;
         private bool closed = false;
-        
+
         private object encryptionLock = new object();
         private object decryptionLock = new object();
 
@@ -148,7 +147,6 @@ namespace Shadowsocks.Controller
             }
         }
 
-
         private void HandshakeReceive()
         {
             if (closed)
@@ -218,7 +216,7 @@ namespace Shadowsocks.Controller
             try
             {
                 int bytesRead = connection.EndReceive(ar);
-                
+
                 if (bytesRead >= 3)
                 {
                     command = connetionRecvBuffer[1];
@@ -321,7 +319,8 @@ namespace Shadowsocks.Controller
         {
             public SsServerInfo Server;
 
-            public ServerTimer(int p) :base(p)
+            public ServerTimer(int p)
+                : base(p)
             {
             }
         }
@@ -342,9 +341,7 @@ namespace Shadowsocks.Controller
                 }
                 IPEndPoint remoteEP = new IPEndPoint(ipAddress, server.server_port);
 
-
-                remote = new Socket(ipAddress.AddressFamily,
-                    SocketType.Stream, ProtocolType.Tcp);
+                remote = new Socket(ipAddress.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
                 remote.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.NoDelay, true);
 
                 _startConnectTime = DateTime.Now;

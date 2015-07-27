@@ -12,6 +12,11 @@ namespace Shadowsocks.Model
     {
         private static string CONFIG_FILE = "gui-config.json";
 
+        public Configuration()
+        {
+            ServerInfos = new List<SsServerInfo>();
+        }
+
         public static Configuration Load()
         {
             try
@@ -94,7 +99,7 @@ namespace Shadowsocks.Model
 
         public List<SsServerInfo> ServerInfos { get; set; }
 
-        public SsServerInfo GetCurrentServer()
+        public SsServerInfo GetCurrentSsServerInfo()
         {
             if (selectedSsServerInfoIndex >= 0 && selectedSsServerInfoIndex < ServerInfos.Count)
             {

@@ -19,7 +19,6 @@ namespace Shadowsocks.Controller
     public class ShadowsocksController
     {
         private Thread _ramThread;
-
         private Listener _listener;
         private PACServer _pacServer;
         private Configuration _config;
@@ -27,8 +26,13 @@ namespace Shadowsocks.Controller
         private PolipoRunner polipoRunner;
         private GFWListUpdater gfwListUpdater;
         private bool stopped = false;
-
         private bool _systemProxyIsDirty = false;
+
+        public ShadowsocksController()
+        {
+            _config = Configuration.Load();
+            _strategyManager = new StrategyManager(this);
+        }
 
         public event EventHandler ConfigChanged;
 
@@ -57,12 +61,6 @@ namespace Shadowsocks.Controller
             }
         }
 
-        public ShadowsocksController()
-        {
-            _config = Configuration.Load();
-            _strategyManager = new StrategyManager(this);
-        }
-
         public void Start()
         {
             Reload();
@@ -70,7 +68,7 @@ namespace Shadowsocks.Controller
 
         public SsServerInfo GetCurrentServer()
         {
-            return _config.GetCurrentServer();
+            return _config.GetCurrentSsServerInfo();
         }
 
         // always return copy
@@ -110,6 +108,7 @@ namespace Shadowsocks.Controller
             {
                 return strategy.GetAServer(type, localIPEndPoint);
             }
+
             return GetCurrentServer();
         }
 
