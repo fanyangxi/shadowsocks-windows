@@ -89,8 +89,8 @@ namespace Shadowsocks.Controller
                 _currentConfiguration.ServerInfos.Remove(serverInfo);
                 _ssController.SaveServers(_currentConfiguration.ServerInfos, _currentConfiguration.localPort);
 
-                var aaa = string.Format("Expired ss-server has been removed, {0} left", _currentConfiguration.ServerInfos.Count);
-                Shadowsocks.View.MenuViewController.ShowBalloonTip("Info", aaa, System.Windows.Forms.ToolTipIcon.Warning, 3000);
+                var aaa = string.Format("Expired ss-servers has been removed, {0} left", _currentConfiguration.ServerInfos.Count);
+                Shadowsocks.View.MenuViewController.ShowBalloonTip("Info", aaa, System.Windows.Forms.ToolTipIcon.Warning, 1000);
             }
             catch (Exception ex)
             {

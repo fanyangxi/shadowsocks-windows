@@ -105,8 +105,8 @@ namespace Shadowsocks.View
         {
             //var aaa = new SsServerInfoChecker();
             //aaa.Check(_lastSelectedSsServerInfo);
+            //return;
 
-            return;
             if (_lastSelectedSsServerInfo != null)
             {
                 _currentConfiguration.ServerInfos.Remove(_lastSelectedSsServerInfo);

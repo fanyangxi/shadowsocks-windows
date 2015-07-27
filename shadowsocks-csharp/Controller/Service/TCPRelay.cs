@@ -24,10 +24,12 @@ namespace Shadowsocks.Controller
             {
                 return false;
             }
+
             if (length < 2 || firstPacket[0] != 5)
             {
                 return false;
             }
+
             socket.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.NoDelay, true);
             Handler handler = new Handler();
             handler.connection = socket;
@@ -156,7 +158,6 @@ namespace Shadowsocks.Controller
             try
             {
                 int bytesRead = _firstPacketLength;
-
                 if (bytesRead > 1)
                 {
                     byte[] response = { 5, 0 };
@@ -369,12 +370,14 @@ namespace Shadowsocks.Controller
             {
                 return;
             }
+
             SsServerInfo server = ((ServerTimer)sender).Server;
             IStrategy strategy = controller.GetCurrentStrategy();
             if (strategy != null)
             {
                 strategy.SetFailure(server);
             }
+
             Console.WriteLine(String.Format("{0} timed out", server.DisplayName()));
             remote.Close();
             RetryConnect();
