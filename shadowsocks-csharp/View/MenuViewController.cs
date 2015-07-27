@@ -153,9 +153,9 @@ namespace Shadowsocks.View
                 String.Format(I18N.GetString("Running: Port {0}"), config.localPort);
 
             // we want to show more details but notify icon title is limited to 63 characters
-            var text = I18N.GetString("Shadowsocks") + " " + UpdateChecker.Version + "\n" +
+            var text = string.Format("{0} {1}", I18N.GetString("Shadowsocks"), UpdateChecker.Version) + validSsServerInfoCount + "\n" +
                 tProxyStatusDesc + "\n" +
-                serverInfo + validSsServerInfoCount;
+                serverInfo;
             _notifyIcon.Text = text.Substring(0, Math.Min(63, text.Length));
         }
 
