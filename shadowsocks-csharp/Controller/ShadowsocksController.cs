@@ -294,11 +294,13 @@ namespace Shadowsocks.Controller
             {
                 polipoRunner = new PolipoRunner();
             }
+
             if (_pacServer == null)
             {
                 _pacServer = new PACServer();
                 _pacServer.PACFileChanged += pacServer_PACFileChanged;
             }
+
             _pacServer.UpdateConfiguration(_config);
             if (gfwListUpdater == null)
             {

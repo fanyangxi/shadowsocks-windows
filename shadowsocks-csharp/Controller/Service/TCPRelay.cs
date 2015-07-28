@@ -371,8 +371,8 @@ namespace Shadowsocks.Controller
                 return;
             }
 
-            SsServerInfo server = ((ServerTimer)sender).Server;
-            IStrategy strategy = controller.GetCurrentStrategy();
+            var server = ((ServerTimer)sender).Server;
+            var strategy = controller.GetCurrentStrategy();
             if (strategy != null)
             {
                 strategy.SetFailure(server);
@@ -406,7 +406,7 @@ namespace Shadowsocks.Controller
             }
             try
             {
-                ServerTimer timer = (ServerTimer)ar.AsyncState;
+                var timer = (ServerTimer)ar.AsyncState;
                 server = timer.Server;
                 timer.Elapsed -= connectTimer_Elapsed;
                 timer.Enabled = false;
@@ -421,7 +421,8 @@ namespace Shadowsocks.Controller
                 //    remote.RemoteEndPoint.ToString());
 
                 var latency = DateTime.Now - _startConnectTime;
-                IStrategy strategy = controller.GetCurrentStrategy();
+
+                var strategy = controller.GetCurrentStrategy();
                 if (strategy != null)
                 {
                     strategy.UpdateLatency(server, latency);
@@ -436,12 +437,13 @@ namespace Shadowsocks.Controller
             {
                 if (server != null)
                 {
-                    IStrategy strategy = controller.GetCurrentStrategy();
+                    var strategy = controller.GetCurrentStrategy();
                     if (strategy != null)
                     {
                         strategy.SetFailure(server);
                     }
                 }
+
                 Logging.LogUsefulException(e);
                 RetryConnect();
             }
@@ -491,7 +493,7 @@ namespace Shadowsocks.Controller
                     }
                     connection.BeginSend(remoteSendBuffer, 0, bytesToSend, 0, new AsyncCallback(PipeConnectionSendCallback), null);
 
-                    IStrategy strategy = controller.GetCurrentStrategy();
+                    var strategy = controller.GetCurrentStrategy();
                     if (strategy != null)
                     {
                         strategy.UpdateLastRead(this.server);

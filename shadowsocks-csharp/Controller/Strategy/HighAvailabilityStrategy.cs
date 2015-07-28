@@ -172,6 +172,24 @@ namespace Shadowsocks.Controller.Strategy
             if (_serverStatus.TryGetValue(server, out status))
             {
                 status.lastFailure = DateTime.Now;
+                RemoveExpiredSsServerInfoFromConfig(server);
+            }
+        }
+
+        private void RemoveExpiredSsServerInfoFromConfig(SsServerInfo serverInfo)
+        {
+            try
+            {
+                var currentConfiguration = _controller.GetCurrentConfiguration();
+                currentConfiguration.ServerInfos.Remove(serverInfo);
+                _controller.SaveServers(currentConfiguration.ServerInfos, currentConfiguration.localPort);
+
+                var aaa = string.Format("Expired ss-server ({0}) has been removed, {1} left", serverInfo.DisplayName(), currentConfiguration.ServerInfos.Count);
+                Shadowsocks.View.MenuViewController.ShowBalloonTip("Info", aaa, System.Windows.Forms.ToolTipIcon.Warning, 1000);
+            }
+            catch (Exception ex)
+            {
+                Logging.LogUsefulException(ex);
             }
         }
     }

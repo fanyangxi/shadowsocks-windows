@@ -41,9 +41,10 @@ namespace Shadowsocks
 #endif
                 var controller = new ShadowsocksController();
                 var mViewController = new MenuViewController(controller);
-                var serverInfosChecker = new SsServerInfoChecker(controller);
                 controller.Start();
-                serverInfosChecker.ReStartCheckTimer();
+
+                //var serverInfosChecker = new SsServerInfoChecker(controller);
+                //serverInfosChecker.ReStartCheckTimer();
 
                 Application.Run();
             }

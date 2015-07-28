@@ -128,7 +128,6 @@
     <Compile Include="Controller\free+iShadowsocks\FreeiShadowsocksScrapper.cs" />
     <Compile Include="Controller\free+SS-Link\FreeSsLinkScrapper.cs" />
     <Compile Include="Controller\PathEventArgs.cs" />
-    <Compile Include="Controller\SsServerInfoChecker.cs" />
     <Compile Include="Controller\Strategy\HighAvailabilityStrategy.cs" />
     <Compile Include="Controller\System\AutoStartup.cs" />
     <Compile Include="Controller\FileManager.cs" />
